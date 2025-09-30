@@ -1,0 +1,16 @@
+.DS_Store
+**/bin/**
+**/tmp/**
+**/.vscode/**
+
+# EdL
+./EdL/tex/
+
+
+# VScode
+
+
+.vscode
+.vscode/*
+*/.vscode
+*/.vscode/*%
