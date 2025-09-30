@@ -17,6 +17,6 @@ Benvenuti nella repository degli appunti presi a lezione del corso "Algoritmi pe
 
 ## Contributors
 
-<a href="https://github.com/unipr-org/AI/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=unipr-org/AI" />
+<a href="https://github.com/unipr-org/AIA/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=unipr-org/AIA" />
 </a>
