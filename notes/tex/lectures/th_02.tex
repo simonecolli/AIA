@@ -1,0 +1,274 @@
+\section{Classificazione}
+
+La classificazione è un'attività dell'apprendimento supervisionato che
+consiste nell'assegnare un'etichetta (o classe) a un dato
+sulla base di sue caratteristiche osservabili.
+
+Nell'ambito della classificazione si parla di:
+\begin{itemize}
+    \item \textbf{Feature} (caratteristiche): un aspetto direttamente
+    osservabile di un fenomeno per il quale si può registrare una
+    misura, che sia quantitativa (numerica) o categoriale
+    (come vero/falso, rosso/verde, ecc.).
+    \item \textbf{Classe}: un concetto astratto
+    e generale che "spiega" le osservazioni. L'assegnazione
+    a una classe costituisce una sintesi delle feature osservate.
+    \item \textbf{Label} (o etichetta): il nome specifico di una classe.
+\end{itemize}
+
+Tuttavia, alcuni dati possono rendere più complesso
+l'assegnazione delle classi; questi esempi sono tecnicamente noti come
+\textbf{outlier statistici}.
+
+\begin{definizione}{Classificazione}
+Data una \textbf{collezione di dati}, definita come un insieme $P$
+di $M$-uple del tipo:
+\[
+m_i = (x_{1i}, \ldots, x_{Mi}) \in D_1 \times \ldots \times D_M
+\]
+dove ogni $x_{ji}$ rappresenta una feature ed appartiene ad un possibile
+dominio di valori $D_j$.
+
+L'insieme $P$ è partizionato in $k$ classi, le cui etichette
+compongono l'insieme $L = (A_1, \ldots, A_k)$.
+
+Un \textbf{algoritmo di classificazione} è una funzione compputabile
+$f: P \mapsto L$, tale che:
+\[
+f(m \in P) = f(x_1, \ldots, x_m) \in L
+\]
+Tale funzione $f(m)$ assegna a ogni dato $m$ un'etichetta $A_i$ scelta
+tra quelle presenti in $L$ cercando di stimare l'etichetta reale del stesso.
+
+Lo schema di classificazione può produrre due tipi di risultati:
+\begin{itemize}
+    \item \textbf{Successo} (hit) se l'etichetta stimata $f(m)$
+    coincide con l'etichetta reale del dato.
+    \item \textbf{Fallimento} (miss) se l'etichetta stimata è errata.
+\end{itemize}
+
+\end{definizione}
+
+È generalmente impossibile creare classificatori \textit{error free}.
+È quindi fondamentale fornire stime sul tasso percentuale di hit/miss
+che lo schema può ottenere. Il livello tollerabile di errore
+dipende dalla \textbf{criticità dell'applicazione}: per applicazioni
+industriali si può richiedere un tasso $< 5\%$, mentre per
+applicazioni mediche un tasso $> 0.5\%$ potrebbe essere
+già inaccettabile.
+
+
+\begin{esempio}{Problema di classificazione: salmoni e branzino}{ex:salmoni_branzino}
+
+Si consideri il problema di distinguere tra salmoni e branzini (sea bass) basandosi
+su alcune caratteristiche osservabili.
+Le \textbf{feature} utilizzate potrebbero essere la lunghezza, il peso in grammi
+e il colore dominante (un attributo qualitativo scelto da un insieme predefinito
+come \{blu, grigio, verde\}).
+I dati vengono tipicamente organizzati in una tabella, dove ogni riga corrisponde
+a un pesce e le colonne ne descrivono le feature.
+
+L'obiettivo è costruire un classificatore che, per ogni nuovo pesce osservato,
+sia in grado di riempire la colonna ``specie'' con l'etichetta corretta
+(``salmone'' o ``branzino'').
+È importante notare che gli errori non hanno lo stesso costo: confondere un
+salmone (pesce pregiato) con un branzino (meno pregiato) è un errore più grave
+del contrario.
+
+\end{esempio}
+
+\begin{esempio}{Problema di classificazione: studenti e carriera}{ex:studenti_carriera}
+
+Si consideri il problema di predire il futuro successo economico degli studenti
+universitari.
+Le \textbf{feature} raccolte per ogni studente includono dati anagrafici, il
+censo familiare e i voti conseguiti durante la carriera universitaria.
+L'obiettivo è costruire un classificatore che predica in quale \textbf{classe}
+di reddito si troverà lo studente dieci anni dopo la laurea. Le etichette
+(o \textbf{label}) potrebbero essere \{``reddito basso'', ``reddito medio'',
+``reddito alto''\}.
+
+È importante notare che, a causa dell'elevato numero di fattori non misurabili
+che influenzano la vita di un individuo, una predizione del genere ha un valore
+limitato se applicata al singolo studente, che ha un'alta probabilità di essere
+classificato erroneamente.
+
+Tuttavia, questo tipo di analisi è estremamente utile a livello statistico e
+aggregato, per comprendere le tendenze generali di un'intera popolazione
+studentesca e informare politiche educative o economiche.
+
+\end{esempio}
+
+\subsection{Costruire un classificatore}
+
+Il processo di costruzione di un classificatore automatico simula
+il fenomeno dell'apprendimento umano o animale, noto come
+\textbf{training} (addestramento). L'idea è \textbf{dedurre regole
+generali}, applicabili a record non ancora classificati,
+partendo dall'osservazione di esempi già noti e ben classificati.
+
+Si definisce \textbf{universo delle osservazioni} l'insieme
+complessivo dei record (passati, presenti e futuri) relativi ad un fenomeno.
+Molti algoritmi iniziano esaminando un sottoinsieme di questo
+universo, già classificato e ben compreso.
+
+Questo insieme di "allenamento", chiamato \textbf{Training Set (TS)},
+è il deposito di informazioni iniziali da cui l'algoritmo
+ricava le "regole" di classificazione. Le regole ricavate saranno di vario
+tipo: statistiche, probabilistiche, fuzzy, funzioni discendenti, ecc.
+
+\subsection{Proprietà di un classificatore}
+
+Un buon insieme di regole di classificazione deve avere tre
+importanti proprietà:
+\begin{itemize}
+    \item \textbf{Semplicità}: Le regole non devono essere troppo
+    complicate, per garantire efficienza e basso costo computazionale
+    in fase di classificazione.
+    \item \textbf{Correttezza sul TS}: Le regole devono essere
+    statisticamente sufficientemente corrette quando applicate
+    al medesimo Training Set che le ha generate.
+    \item \textbf{Generalizzabilità}: Le regole devono essere
+    statisticamente corrette anche quando applicate al resto
+    dei record dell'universo (dati nuovi, non visti).
+\end{itemize}
+
+\textbf{Statisticamente corretto} è un termine che indica che il tasso dei
+miss non deve superare certe soglie di tolleranza che dipendono
+dalla criticità delle applicazioni.
+
+\subsection{Il problema dell'overfitting}
+
+Le proprietà di correttezza sul TS e di generalizzabilità sono
+spesso in conflitto tra loro.
+Questo paradosso è noto come \textbf{overfitting} (sovradattamento).
+
+L'overfitting si verifica quando un modello si adatta
+"troppo bene" ai dati del Training Set. Un modello molto
+complesso può imparare a memoria le peculiarità e persino
+il rumore casuale presente nel TS, ottenendo una correttezza
+perfetta su di esso.
+Tuttavia, tale modello non avrà appreso la "tendenza" generale
+dei dati e fallirà nel generalizzare a nuovi record,
+poiché la frontiera di decisione che ha appreso è
+eccessivamente complessa e specifica per il campione di training.
+
+L'obiettivo non è quindi minimizzare l'errore sul TS (che
+porterebbe a un modello complesso e in overfitting), ma
+trovare un equilibrio: un modello (es. una retta o una
+curva semplice) che, pur commettendo qualche errore sul TS,
+catturi la struttura di fondo dei dati e possa quindi
+generalizzare meglio.
+
+\subsection{Validazione}
+
+Per "convalidare" la proprietà di generalizzazione di un
+insieme di regole, si utilizza un metodo che prevede, oltre
+al TS, un altro insieme di record già etichettati, detto
+\textbf{Control Set (CS)} o \textbf{Test Set}.
+
+Il CS \textbf{non} viene utilizzato durante la fase di
+training (cioè per la sintesi delle regole). Viene usato
+solo dopo che le regole sono state definite.
+Se le regole mostrano sul CS un tasso di errore (miss)
+simile a quello ottenuto sul TS, allora si ritiene
+che le regole siano \textbf{generalizzabili}.
+
+Poiché anche il CS è un campione casuale, per una stima
+più precisa è buona norma ripetere i test con diversi CS,
+spesso creati tramite strategie di randomizzazione
+nella selezione del TS e del CS dall'universo disponibile.
+
+\subsection{Gestione delle feature e del rumore}
+
+Nella costruzione di un classificatore è cruciale gestire
+sia la selezione delle feature che la presenza di rumore.
+
+\subsubsection{Selezione delle feature}
+Spesso si rilevano molte feature, ma non tutte sono utili;
+alcune possono essere sovrabbondanti o addirittura dannose.
+Combinare più feature (es. lunghezza e luminosità dei pesci)
+è spesso una strategia conveniente, ma non è detto che
+sia sempre la migliore.
+L'inclusione di troppe feature, specialmente se irrilevanti,
+può amplificare il "rumore" e confondere il classificatore.
+
+Una buona pratica è scegliere feature che siano
+\textbf{invarianti} alle trasformazioni tipiche della
+situazione sperimentale (es. il peso di un pesce è
+invariante alle condizioni di luce, la luminanza no).
+Inoltre, deve esistere una probabile relazione tra le
+feature misurate e la classe da predire.
+
+\subsubsection{Rumore e outlier}
+I dati del mondo reale contengono inevitabilmente
+\textbf{rumore}, ovvero perturbazioni dovute a fenomeni
+non controllabili o non noti. Le cause di tale
+spostamento dai valori "ideali" possono essere:
+\begin{itemize}
+    \item \textbf{Endogene}: Interne al fenomeno (es. un pesce
+    con una dieta o storia anomala).
+    \item \textbf{Esogene}: Dovute all'osservatore o allo
+    strumento utilizzato (es. macchina fotografica starata,
+    etichettatore distratto).
+\end{itemize}
+
+I dati molto "fuori norma" rispetto ai valori tipici di una
+classe sono definiti \textbf{outlier}.
+Un buon algoritmo di classificazione deve essere
+\textbf{robusto}, ovvero deve avere una forma di
+"protezione" o resistenza alle deviazioni che il rumore
+impone al processo decisionale.
+
+\subsection{Valutazione degli errori}
+
+Contare gli errori è essenziale, ma una singola percentuale
+di errore non è sufficientemente descrittiva. Questo perché
+non tutti gli errori sono uguali: i \textbf{costi degli errori}
+spesso \textbf{non sono uniformi} o simmetrici.
+
+Ad esempio, in una diagnosi medica:
+\begin{itemize}
+    \item Classificare un sano come malato (Falso Positivo)
+    è un errore con un costo relativamente basso (paura, un
+    test aggiuntivo).
+    \item Classificare un malato come sano (Falso Negativo)
+    è un errore gravissimo, che ritarda la diagnosi e
+    può costare la vita al paziente.
+\end{itemize}
+
+Per analizzare questa asimmetria si usa la
+\textbf{matrice di confusione}. È una griglia quadrata
+che riporta quante istanze della classe "Reale" (sulle colonne)
+sono state assegnate alla classe "Prevista" (sulle righe).
+
+Un classificatore perfetto ha come matrice di confusione la
+matrice identica (tutti i valori sulla diagonale principale,
+zero altrove). Un buon classificatore avrà valori
+percentuali bassi al di fuori della diagonale principale.
+
+\subsection{Fasi di un sistema di classificazione}
+
+Il processo di classificazione automatica si articola in
+diverse fasi:
+\begin{enumerate}
+    \item \textbf{Sensing (o sampling)}: Raccolta dei dati dal
+    mondo fisico e loro digitalizzazione.
+    \item \textbf{Segmentazione}: Partizione dei dati in unità
+    significative, pulizia ed eliminazione di dati irrilevanti.
+    \item \textbf{Estrazione delle feature}: Misurazione delle
+    caratteristiche (quantitative o qualitative). È cruciale
+    scegliere feature invarianti e rilevanti.
+    \item \textbf{Classificazione}: Esecuzione dell'algoritmo
+    scelto per l'assegnazione delle etichette.
+    \item \textbf{Post-processing}: Valutazione della qualità
+    della classificazione e dei costi associati agli errori.
+    \item \textbf{Decisione}: Utilizzo effettivo del
+    classificatore per risolvere il problema reale.
+\end{enumerate}
+
+La costruzione di un classificatore è un \textbf{ciclo
+iterativo} che prevede la raccolta dei dati, la selezione
+delle feature, la scelta di un modello matematico, il
+training dell'algoritmo e infine la sua valutazione,
+ripetendo i passi per migliorare le prestazioni.
