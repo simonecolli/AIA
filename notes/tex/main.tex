@@ -3,6 +3,21 @@
 % grafici
 \usepackage{pgfplots}
 \usepackage{float}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usepackage{multirow}
+
+\usetikzlibrary{positioning, arrows.meta}
+
+
+% colori per abbinare l'immagine
+\definecolor{fn_bg}{HTML}{D9EAD3} % Sfondo verde chiaro per 'false negatives'
+\definecolor{tn_bg}{HTML}{EFEFEF} % Sfondo grigio chiaro per 'true negatives'
+\definecolor{tp_fill}{HTML}{B6D7A8} % Verde più scuro per 'true positives'
+\definecolor{fp_fill}{HTML}{F4CCCC} % Rosso chiaro per 'false positives'
+\definecolor{datapoint}{HTML}{666666} % Grigio per i punti
+\definecolor{fn_area}{HTML}{8A9A83} % Verde/Grigio scuro per area 'relevant' (FN)
 
 
 \renewcommand{\coursetitle}{Algoritmi per l'intelligenza artificiale}
@@ -28,6 +43,7 @@
 
 \include{lectures/th_01}
 \include{lectures/th_02}
+\include{lectures/th_03}
 
 
 

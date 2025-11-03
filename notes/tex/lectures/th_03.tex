@@ -1,0 +1,576 @@
+%% blocco slide 3
+
+
+\section{Tecniche di validazione per la classificazione}
+
+Dopo aver costruito un modello di classificazione, è fondamentale valutarne le
+performance. A differenza della regressione, dove si cerca di predire un
+valore numerico di output dato uno o più valori di input, nella
+classificazione si vuole predire la classe di un oggetto dato uno o più
+dati di input di qualsiasi tipo (numerici, categorici, testuali, ecc.).
+
+Per questo motivo gli strumenti che si possono applicare per valutare un modello di
+classificazione sono sostanzialmente diversi rispetto alle metriche utilizzate
+per valutare i modelli di regressione.
+
+\subsection{Modello di validazione base: Training e Test Set}
+
+L'approccio base per la validazione consiste nel dividere, secondo una certa
+\textbf{percentuale} i dati disponibili in due insiemi:
+
+\begin{itemize}
+    \item \textbf{Training set (TS)}: Utilizzato per addestrare il
+    classificatore. Le etichette (label) di questi dati sono usate per
+    addestrare il classificatore.
+    \item \textbf{Test set}: Utilizzato per valutare la bontà del modello.
+    Le etichette di questo set vengono usate solo per verificare se
+    il classificatore ha predetto correttamente.
+\end{itemize}
+
+L'obiettivo della validazione non è solo misurare l'errore, ma ha lo scopo di
+rispondere a domande più complesse, come:
+\begin{itemize}
+    \item Il classificatore performa in modo bilanciato su tutte le classi?
+    \item Ha delle preferenze?
+    \item Tali preferenze da cosa dipendono?
+\end{itemize}
+Per questo motivo per la valutazione dei classificatori si utilizzano indici
+matematici che permettono sia di avere stime oggettive delle performance, sia
+di automatizzare anche altre fasi del processo della progettazione o sviluppo
+del classificatore.
+
+Gli indici principali relativamente all'aspetto computazionale utilizzati
+per valutare un classificatore sono:
+\begin{itemize}
+    \item \textbf{Accuratezza}: La bontà nel predire correttamente le
+    etichette.
+    \item \textbf{Robustezza}: La capacità di gestire dati con rumore o valori
+    mancanti.
+    \item \textbf{Velocità}: Include sia il tempo per costruire il modello
+    (training time) sia il tempo per usarlo (classification/prediction time).
+    \item \textbf{Scalabilità}: L'efficienza del modello su grandi dataset,
+    specialmente se in memoria secondaria.
+    \item \textbf{Interpretabilità}: La facilità con cui i risultati del
+    modello possono essere compresi.
+\end{itemize}
+
+\subsection{Metriche di valutazione}
+Per definire le metriche più comuni, si assume un problema di classificazione
+binaria. Si assume che l'insieme delle classi $\mathbb{C}$ dell'esperimento
+sia composto da due classi: $\mathbb{C}=\{A,B\}$.
+
+Relativamente ad una delle classi è possibile definire alcune misure per
+calcolare la bontà dell'algoritmo in valutare tale classe.
+
+Data una classe di interesse (es. A, la classe ``positiva''),
+i risultati della classificazione sul test set vengono divisi in quattro
+categorie:
+
+\begin{itemize}
+    \item True positive (TP).
+    \item True negative (TN).
+    \item False positive (FP).
+    \item False negative (FN).
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+    % Definiamo stili per i punti dati
+    solid_point/.style = {
+        circle, 
+        fill=datapoint, 
+        minimum size=6pt, 
+        inner sep=0
+    },
+    hollow_point/.style = {
+        circle, 
+        draw=datapoint, 
+        thick, 
+        minimum size=6pt, 
+        inner sep=0
+    }
+]
+
+% 1. Disegnare le aree di sfondo (Actual)
+% Sfondo per\"Relevant\"(Sinistra)
+\fill[fn_bg] (-5, -5) rectangle (0, 6.5);
+% Sfondo per\"Not Relevant\"(Destra)
+\fill[tn_bg] (0, -5) rectangle (5, 6.5);
+
+% 2. Disegnare il cerchio (Selected) e riempirlo
+% Riempiamo la metà sinistra (True Positives)
+\fill[tp_fill] (90:3.5) arc (90:270:3.5) -- cycle;
+% Riempiamo la metà destra (False Positives)
+\fill[fp_fill] (90:3.5) arc (90:-90:3.5) -- cycle;
+
+% Disegniamo il bordo nero del cerchio
+\draw[thick] (0, 0) circle (3.5cm);
+
+% 3. Posizionare i punti dati
+% False Negatives (Solidi, Sinistra, Fuori)
+\node[solid_point] at (-2.5, 4.5) {};
+\node[solid_point] at (-1, 4.2) {};
+\node[solid_point] at (-4, 3) {};
+\node[solid_point] at (-4.5, -1) {};
+\node[solid_point] at (-2.5, -4.5) {};
+\node[solid_point] at (-1.5, -4) {};
+
+% True Positives (Solidi, Sinistra, Dentro)
+\node[solid_point] at (-1.8, 2.8) {};
+\node[solid_point] at (-0.8, 1.5) {};
+\node[solid_point] at (-2.5, 0.5) {};
+\node[solid_point] at (-1.5, -1) {};
+\node[solid_point] at (-2.5, -2.5) {};
+\node[solid_point] at (-0.8, -3) {};
+
+% False Positives (Vuoti, Destra, Dentro)
+\node[hollow_point] at (1.2, 2.5) {};
+\node[hollow_point] at (1.8, -1.2) {};
+\node[hollow_point] at (0.8, -2.5) {};
+
+% True Negatives (Vuoti, Destra, Fuori)
+\node[hollow_point] at (2.5, 5) {};
+\node[hollow_point] at (4, 4) {};
+\node[hollow_point] at (1.5, 3.8) {};
+\node[hollow_point] at (4.5, 1) {};
+\node[hollow_point] at (3.5, -3) {};
+\node[hollow_point] at (2.5, -4.2) {};
+\node[hollow_point] at (1.5, -4.8) {};
+\node[hollow_point] at (4.5, -4.5) {};
+
+% 4. Aggiungere le etichette
+% Etichette di sfondo
+\node[anchor=west] at (0.5, 5.5) {true negatives};
+\node[anchor=east] at (-0.5, 5.5) {false negatives};
+
+% Etichette del cerchio
+\node at (-1.75, 0) {true positives};
+\node at (1.75, 0) {false positives};
+
+% Etichetta\"relevant elements\"con la staffa
+\draw [thick] (-4.8, 6.2) -- (-4.8, 5.8);
+\draw [thick] (-4.8, 5.8) -- (0, 5.8);
+\draw [thick] (0, 5.8) -- (0, 6.2);
+\node at (-2.4, 5.8) [above=2mm] {Elementi rilevanti};
+
+% Etichetta\"selected elements\"con il puntatore
+\node (label_sel) at (-3.5, -5) {Elementi selezionati};
+% Il punto sul cerchio è a 240 gradi, raggio 3.5
+\draw [thick, -] (label_sel.north) -- (240:3.5);
+
+\end{tikzpicture}
+\end{center}
+
+\begin{definizione}{TP, TN, FP, FN}{}
+
+Sia $c: CS \mapsto \mathbb{C}$ la funzione che mappa ogni record $x \in CS$
+nella sua classe reale e sia $\tilde{c}: CS \mapsto \mathbb{C}$ il
+classificatore che assegna una classe ad $A$.
+
+Sia $C = \{A, B\}$ l'insieme delle classi, composto dalle classi $A$ e $B$.
+Prendendo come riferimento la classe $A$ è possibile dividere $CS$ in 4 insiemi:
+
+\begin{itemize}
+    \item \textbf{True positive (TP)}: I record $x \in CS$ classificati \textbf{correttamente},
+    ovvero la cui classe reale è $A$, quindi $\tilde{c}(x) = c(x) = A$
+    \item \textbf{True negative (TN)}: I record $x \in CS$ classificati \textbf{correttamente},
+    ovvero la cui classe reale è $B$, quindi $\tilde{c}(x) = c(x) = B$
+    \item \textbf{False positive (FP)}: I record $x \in CS$ classificati \textbf{erroneamente},
+    ovvero la cui classe reale è $B$, quindi $\tilde{c}(x) = B \ne A = c(x)$
+    \item \textbf{False negative (FN)}: I record $x \in CS$ classificati \textbf{erroneamente},
+    ovvero la cui classe reale è $B$, quindi $\tilde{c}(x) = A \ne B = c(x)$
+\end{itemize}
+\end{definizione}
+
+\bigskip
+Basandosi su queste quattro categorie, è possibile definire le metriche di
+performance più utilizzate.
+
+\begin{definizione}{Precision}{}
+Sia $C = \{A, B\}$ l'insieme delle classi, composto dalle classi $A$ e $B$.
+La precision (precisione) è la frazione di elementi rilevanti per una classe
+di riferimento, $A$, tra tutti gli elementi che il classificatore ha
+identificato come $A$.
+La precision misura quanto è ``affidabile'' la predizione positiva,
+ed è definita come:
+\[
+Precision = \frac{TP}{TP+FP}
+\]
+
+\end{definizione}
+
+\begin{definizione}{Recall}{}
+Sia $C = \{A, B\}$ l'insieme delle classi, composto dalle classi $A$ e $B$.
+La recall (richiamo o sensitività) è la frazione di elementi rilevanti
+(classi A) che sono stati correttamente classificati come A.
+Misura la capacità del classificatore di ``trovare'' tutti i positivi.
+\[
+Recall = \frac{TP}{TP+FN}
+\]
+\end{definizione}
+
+\begin{center}
+\begin{tikzpicture}[
+    font=\sffamily\small,
+    radius=0.35cm % Raggio ridotto per i cerchi
+]
+
+% --- Titolo ---
+\node[font=\sffamily\bfseries] at (3.5, 1.2) {Rappresentazione grafica delle metriche};
+
+
+% --- Definiamo una forma riutilizzabile per il semicerchio TP ---
+\def\tpsemicircle{
+    % Arrotondamento verde
+    \fill[tp_fill] (90:0.35) arc (90:270:0.35) -- cycle;
+    % Bordo dell'arco
+    \draw[black] (90:0.35) arc (90:270:0.35);
+    % Linea dritta
+    \draw[black] (90:0.35) -- (270:0.35);
+}
+
+% --- 1. Precision ---
+% Etichetta
+\node (prec_label) at (0, 0) {Precision =};
+
+% Posizioniamo la frazione a destra dell'etichetta
+\begin{scope}[shift={(prec_label.east)}, xshift=1.5cm]
+    
+    % Numeratore (TP Semicerchio)
+    \begin{scope}[yshift=0.55cm]
+        \tpsemicircle
+    \end{scope}
+    
+    % Linea di frazione
+    \draw[thick] (-0.8, 0) -- (0.8, 0);
+    
+    % Denominatore (TP + FP Cerchio intero, "selected elements")
+    \begin{scope}[yshift=-0.55cm]
+        \fill[tp_fill] (90:0.35) arc (90:270:0.35) -- cycle;
+        \fill[fp_fill] (90:0.35) arc (90:-90:0.35) -- cycle;
+        \draw[black] (0,0) circle (0.35);
+    \end{scope}
+\end{scope}
+
+% --- 2. Recall ---
+% Etichetta
+\node (rec_label) at (5, 0) {Recall =};
+
+% Posizioniamo la frazione a destra dell'etichetta
+\begin{scope}[shift={(rec_label.east)}, xshift=1.5cm]
+    
+    % Numeratore (TP Semicerchio)
+    \begin{scope}[yshift=0.55cm]
+        \tpsemicircle
+    \end{scope}
+    
+    % Linea di frazione
+    \draw[thick] (-0.8, 0) -- (0.8, 0);
+    
+    % Denominatore (Come da tua immagine: Rettangolo scuro [FN] che contiene TP)
+    % Questo rappresenta (TP) / (TP + FN) o "relevant elements"
+    \begin{scope}[yshift=-0.85cm]
+        % Rettangolo scuro di sfondo (FN)
+        \fill[fn_area] (-0.5, -0.15) rectangle (0.5, 0.7);
+        % Semicerchio TP sovrapposto
+        \begin{scope}[yshift=0.25cm]
+            \tpsemicircle
+        \end{scope}
+    \end{scope}
+\end{scope}
+
+\end{tikzpicture}
+\end{center}
+
+\begin{nota}{Valori ottenuti}{}
+Valori alti per entrambe le metriche indicano un buon classificatore.
+Spesso, però, si preferisce utilizzare un indice unico che le combini.
+\end{nota}
+\bigskip
+\begin{definizione}{$F_1$-Score}{}
+Il $F_1$-Score rappresenta la media armonica di precision e recall.
+Fornisce un equilibrio tra le due metriche.
+\[
+F_{1} = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}
+      = \frac{2 \cdot TP}{2 \cdot TP + FP + FN}
+\]
+Come precision e recall, anche l'$F_1$-Score ha un valore compreso tra 0 e 1.
+Maggiore è il valore, maggiore è la bontà del classificatore.
+\end{definizione}
+
+\begin{nota}{Overfitting}{}
+Sebbene un $F_1$-Score alto sia desiderabile, valori molto prossimi a 1
+possono essere un campanello d'allarme per l'overfitting.
+\end{nota}
+
+\subsection{Accuracy}
+
+\begin{definizione}{Accuracy}{}
+La accuracy (accuratezza) misura la quantità totale di oggetti classificati
+correttamente (sia positivi che negativi) rispetto al totale degli oggetti.
+\[
+Accuracy = \frac{TP+TN}{TP+TN+FP+FN}
+\]
+\end{definizione}
+
+\begin{nota}{Accuratezza per dataset sbilanciati}{}
+L'accuracy standard è poco indicata se le classi non sono bilanciate.
+Ad esempio, in un dataset con 95 campioni negativi e 5 positivi,
+un classificatore ``pigro'' che predice sempre ``negativo'' otterrebbe un'accuratezza
+del 95\%, pur essendo totalmente inutile nel riconoscere i positivi.
+\end{nota}
+
+In situazione di sbilanciamento delle classi, si preferisce la Balanced accuracy.
+
+\begin{definizione}{Balanced accuracy}{}
+La Balanced accuracy (accuratezza bilanciata) è la media tra la sensitività
+(per i positivi) e la specificità (per i negativi).
+\[
+Balanced\ accuracy = \frac{TPR + TNR}{2}
+\]
+dove:
+\begin{itemize}
+    \item \textbf{TPR (True Positive Rate)}: È la Recall/Sensitività:
+    $TPR = \frac{TP}{TP+FN}$.
+    \item \textbf{TNR (True Negative Rate)}: È la Specificità:
+    $TNR = \frac{TN}{TN+FP}$.
+\end{itemize}
+\end{definizione}
+
+\subsection{Altri indici e matrice di confusione}
+
+\begin{definizione}{False Discovery Rate (FDR)}{}
+Misura il tasso di errori di tipo I (``false scoperte'' o Falsi positivi)
+rispetto a tutte le predizioni positive.
+\[
+FDR = \frac{FP}{FP+TP} = 1 - Precision
+\]
+\end{definizione}
+
+\subsubsection{Matrice di confusione}
+La matrice di confusione è una tabella che riassume le performance di un
+classificatore binario, incrociando le classi reali con quelle predette e
+mostrando i conteggi di TP, TN, FP e FN.
+È fondamentale perché non tutti gli errori hanno lo stesso costo, come
+discusso in precedenza (es. diagnosi medica errata).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_03/01.png}
+    \caption{Esempio di matrice di confusione per classificazione binaria.}
+\end{figure}
+
+È importante notare che metriche come sensitività, precisione e specificità
+dipendono dalla classe presa in considerazione, mentre l'accuratezza è un
+indice globale.
+
+\subsection{Area Under the Curve (AUC) e curva ROC}
+
+L'AUC (Area Under the Curve) è una misura basata sulla curva ROC (Receiver
+Operating Characteristics).
+
+\begin{definizione}{Curva ROC}{}
+Una curva ROC è un grafico che mostra le performance di un classificatore
+al variare di un suo parametro (es. una soglia). Mette in relazione il
+\textbf{True Positive Rate (TPR)} (sull'asse Y) con il \textbf{False Positive
+Rate (FPR)} (sull'asse X).
+
+( $FPR = 1 - Specificit\grave{a} = \frac{FP}{FP+TN}$ ).
+
+Le curve ROC passano sempre per i punti $(0,0)$ e $(1,1)$. Esistono inoltre due
+condizioni limite che rappresentano due curve di riferimento:
+
+\begin{itemize}
+    \item Una retta che taglia il grafico a 45 gradi passando per l'origine.
+    Questa retta rappresenta il caso del \textbf{classificatore casuale} e
+    l'area sottesa (AUC) è pari a $0.5$.
+    \item Una curva rappresentata dal segmento che dall'origine sale
+    verticalmente al punto $(0,1)$ e dal segmento che congiunge il punto
+    $(0,1)$ a $(1,1)$. Questa curva ha un'area sottesa di valore pari a 1 e
+    rappresenta il \textbf{classificatore perfetto}.
+\end{itemize}
+\end{definizione}
+
+
+L'AUC, ha un valore compreso tra 0 e 1, e misura l'intera area bidimensionale
+sotto la curva ROC.
+\begin{itemize}
+    \item \textbf{AUC = 1}: Rappresenta il classificatore perfetto, che
+    passa per il punto (0,1)
+    \item \textbf{AUC = 0.5}: Rappresenta il classificatore casuale
+    (la linea diagonale).
+    \item \textbf{AUC = 0}: Rappresenta il classificatore
+    ``perfettamente sbagliato'' (che inverte tutte le predizioni).
+\end{itemize}
+Il valore di AUC (tra 0 e 1) può essere interpretato come la probabilità
+che il classificatore assegni un punteggio più alto a un individuo positivo
+scelto a caso, rispetto a un individuo negativo scelto a caso.
+
+\subsection{Classificazione multi-classe}
+
+Le misure viste finora (Precision, Recall, $F_1$-score) sono definite per la
+classificazione binaria. Per applicarle a problemi con $K > 2$ classi, si
+perde la visione di performance globale.
+Per l'$F_1$-score, si possono calcolare delle medie. L'approccio
+comune è ``one-vs-rest'': per ogni classe $g_i \in G = \{ 1, \ldots, K \}$,
+si costruisce una matrice di confusione dove $g_i$ è il ``caso positivo'' e
+tutte le altre classi formano il ``caso negativo''.
+Si calcolano così $TP_i$, $FP_i$ e $FN_i$ per ogni classe $i$.
+
+\subsubsection{Micro-average}
+La micro-average (micro-media) aggrega i contributi di tutte le classi
+``sull'unità più piccola'' (i singoli campioni) prima di calcolare le
+metriche.
+Queste metriche sono:
+\[
+P_{micro}=\frac{\sum_{i=1}^{|G|}TP_{i}}{\sum_{i=1}^{|G|}(TP_{i}+FP_{i})}
+\]
+\[
+R_{micro}=\frac{\sum_{i=1}^{|G|}TP_{i}}{\sum_{i=1}^{|G|}(TP_{i}+FN_{i})}
+\]
+Da cui si può derivare il $F_1$-score micro-averaged, $F_{1_{micro}}$
+che rappresenta la media armonica di $P_{micro}$ e $R_{micro}$.
+
+\[
+F_{1_{micro}} = 2 \cdot \frac{P_{micro} \cdot R_{micro}}{P_{micro} + R_{micro}}
+\]
+
+\begin{nota}{Micro-average e classi sbilanciate}{}
+Questa misura non è sensibile alle prestazioni sulle singole classi e può
+essere fuorviante se la distribuzione delle classi è sbilanciata.
+\end{nota}
+
+\subsubsection{Macro-average}
+La macro-average (macro-media) calcola la media su gruppi più vasti.
+\[
+P_{macro}=\frac{\sum_{i=1}^{|G|}P_{i}}{|G|}
+\]
+\[
+R_{macro}=\frac{\sum_{i=1}^{|G|}R_{i}}{|G|}
+\]
+Da cui si può derivare il $F_1$-score macro-averaged, $F_{1_{macro}}$
+che rappresenta la media armonica di $P_{macro}$ e $R_{macro}$.
+\[
+F_{1_{macro}} = 2 \cdot \frac{P_{macro} \cdot R_{macro}}{P_{macro} + R_{macro}}
+\]
+
+\begin{nota}{Macro-average per dati sbilanciati}{}
+Se questo valore è grande, indica che il classificatore funziona bene
+(in media) per ogni singola classe.
+Per questo motivo è più adatto per dati con distribuzione sbilanciata.
+\end{nota}
+
+\subsubsection{Generalizzazione di AUC (Metodo Hand \& Till)}
+Esiste anche una generalizzazione dell'AUC per $k > 2$ classi (Metodo Hand
+\& Till, 2001).
+L'idea è calcolare una misura di separabilità $\hat{A}(i|j)$
+per ogni possibile coppia di classi $(i, j)$.
+
+\begin{definizione}{Generalizzazione AUC}{}
+
+Sia $\hat{A}(i|j)$ la probabilità che dato un elemento a caso della classe $j$
+abbia probabilità inferiore di attribuire quell'elemento alla classe $i$,
+rispetto al valore di probabilità che attribuirebbe ad un elemento a caso
+della classe $i$.
+È possibile calcolare $\hat{A}(i|j)$ utilizzando le seguetnti definizioni:
+\begin{itemize}
+    \item $\hat{p}(X_l)$ è la probabilità stimata che l'osservazione $l$ sia
+    originata dalla classe $i$.
+    \item per tutte le osservazioni $x_l$ della classe $i$, sia $f_l = \hat{p}(X_l)$.
+    la probabilità stimata di appertenere alla classe $i$.
+    \item per tutte le osservazioni $x_k$ della classe $j$, sia $g_k = \hat{p}(X_k)$.
+    la probabilità stimata di appertenere alla classe $i$.
+\end{itemize}
+
+Allora i valori ottenuti ordinati in modo crescente sono:
+$\{g_1, \ldots, g_n, f_1, \ldots, f_n\}$.
+Sia $r_{l}$ il rango della $l$-esima osservazione della classe $i$.
+
+Il numero totale di coppie di punti in cui il punto della classe $j$ ha
+un valore di probabilità stimato di appartenenza alla classe $i$ inferiore
+a quello della classe $i$ è:
+\[
+\sum_{l=1}^{N_i} (r_l - l) = \sum_{l=1}^{N_i} r_l - \sum_{l=1}^{N_i} l = S_i - \frac{N_i(N_i+1)}{2}
+\]
+Dove $N_i$ e $N_j$ sono il numero di osservazioni delle classi $i$ e $j$ e
+$S_i$ è la somma dei ranghi delle osservazioni della classe $i$.
+
+La probabilità che un punto scelto a caso della classe $j$ abbia una probabilità
+stimata di appartenenza alla classe $i$ inferiore a quella di un punto
+scelto a caso della classe $i$ è quindi:
+\[
+\hat{A}(i|j) = \frac{S_i - \frac{N_i(N_i+1)}{2}}{N_i \cdot N_j}
+\]
+
+Inoltre considerando che non è possibile distinguere $\hat{A}(i | j)$ da
+$\hat{A}(j | i)$, si ha che la misura di separabilità tra le classi $i$ e $j$
+è data dalla media tra $\hat{A}(i | j)$ e $\hat{A}(j | i)$, ovvero:
+\[
+\hat{A}(i|j) = \frac{\hat{A}(i|j) + \hat{A}(j|i)}{2}
+\]
+
+Il valore di AUC globale ($M$) di un classificatore multi-classe è quindi dato
+dalla media di tutti i valori $\hat{A}(i|j)$ calcolati è definito come:
+\[
+M=\frac{2}{c(c-1)}\sum_{i<j}\hat{A}(i|j)
+\]
+Dove $c$ è il numero totale di classi, $\frac{2}{c(c-1)}$
+è un fattore che viene applicato perchè sono presenti $c(c-1)$ modi
+differenti con cui costruire coppie distinte di classi.
+
+\end{definizione}
+
+\subsection{Cross-validation}
+
+\begin{definizione}{Cross-Validazione}{}
+È una tecnica statistica usata per validare un modello e valutare come
+i suoi risultati si generalizzeranno a un insieme di dati indipendente.
+L'obiettivo primario è testare la capacità del modello di prevedere su nuovi
+dati, non usati durante l'addestramento.
+Serve principalmente a stimare problemi di \textbf{overfitting} o di
+\textbf{selection bias}.
+\end{definizione}
+
+Il \textit{selection bias} si verifica quando la scelta del training
+set è viziata (da fattori esterni) e non rispecchia un campionamento
+uniforme dell'universo delle osservazioni.
+
+\begin{nota}{Selection bias}
+Il \textit{selection bias} può portare a stime distorte delle performance
+del modello, poiché il training set non rappresenta adeguatamente la
+popolazione generale.
+È importante essere consapevoli di questo bias durante la fase di
+progettazione dello studio e nella raccolta dei dati.
+
+Training set e test set dovrebbero essere prodotti tramite campionamento
+uniforme dell'universo delle possibili osservazioni.
+\end{nota}
+
+La cross-validazione si divide in due tipi principali:
+\begin{itemize}
+    \item Cross-validazione esaustiva, che testa tutte le possibili divisioni
+    del dataset in TS e CS.
+    \item Cross-validazione non esaustiva, che testa solo un sottoinsieme delle
+    possibili divisioni.
+\end{itemize}
+
+\subsubsection{Cross-validazione esaustiva}
+La cross-validazione esaustiva testa tutti i modi possibili di dividere il dataset in TS e CS.
+\begin{itemize}
+    \item \textbf{Leave-p-out (LPO)}: Utilizza $p$ osservazioni come
+    CS e $N-p$ come TS. Questo processo viene ripetuto per tutti le
+    $\binom{n}{p}$ possibili combinazioni.
+    \item \textbf{Leave-one-out (LOOCV)}: È un caso particolare di LPO
+    dove $p=1$. È appropriata per dataset molto piccoli, dove il
+    costo computazionale è secondario rispetto all'accuratezza della stima.
+\end{itemize}
+
+\subsubsection{Cross-validazione non esaustiva}
+
+La cross-validazione non esaustiva testa solo un sottoinsieme
+delle possibili divisioni.
+La tecnica più comune è la \textbf{k-fold cross-validation}, dove il dataset
+viene diviso casualmente in $k$ parti (fold) di eguale dimensione.
+A turno, ogni ``fold'' viene usato come Test Set (CS) e i restanti
+$k-1$ fold vengono usati come Training Set (TS).
+Il processo si ripete $k$ volte e le metriche vengono mediate.
