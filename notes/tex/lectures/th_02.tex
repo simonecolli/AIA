@@ -1,3 +1,4 @@
+%% blocco slide 2
 \section{Classificazione}
 
 La classificazione è un'attività dell'apprendimento supervisionato che
@@ -11,7 +12,7 @@ Nell'ambito della classificazione si parla di:
     misura, che sia quantitativa (numerica) o categoriale
     (come vero/falso, rosso/verde, ecc.).
     \item \textbf{Classe}: un concetto astratto
-    e generale che "spiega" le osservazioni. L'assegnazione
+    e generale che ``spiega'' le osservazioni. L'assegnazione
     a una classe costituisce una sintesi delle feature osservate.
     \item \textbf{Label} (o etichetta): il nome specifico di una classe.
 \end{itemize}
@@ -112,9 +113,9 @@ complessivo dei record (passati, presenti e futuri) relativi ad un fenomeno.
 Molti algoritmi iniziano esaminando un sottoinsieme di questo
 universo, già classificato e ben compreso.
 
-Questo insieme di "allenamento", chiamato \textbf{Training Set (TS)},
+Questo insieme di ``allenamento'', chiamato \textbf{Training Set (TS)},
 è il deposito di informazioni iniziali da cui l'algoritmo
-ricava le "regole" di classificazione. Le regole ricavate saranno di vario
+ricava le ``regole'' di classificazione. Le regole ricavate saranno di vario
 tipo: statistiche, probabilistiche, fuzzy, funzioni discendenti, ecc.
 
 \subsection{Proprietà di un classificatore}
@@ -144,11 +145,11 @@ spesso in conflitto tra loro.
 Questo paradosso è noto come \textbf{overfitting} (sovradattamento).
 
 L'overfitting si verifica quando un modello si adatta
-"troppo bene" ai dati del Training Set. Un modello molto
+``troppo bene'' ai dati del Training Set. Un modello molto
 complesso può imparare a memoria le peculiarità e persino
 il rumore casuale presente nel TS, ottenendo una correttezza
 perfetta su di esso.
-Tuttavia, tale modello non avrà appreso la "tendenza" generale
+Tuttavia, tale modello non avrà appreso la ``tendenza'' generale
 dei dati e fallirà nel generalizzare a nuovi record,
 poiché la frontiera di decisione che ha appreso è
 eccessivamente complessa e specifica per il campione di training.
@@ -162,7 +163,7 @@ generalizzare meglio.
 
 \subsection{Validazione}
 
-Per "convalidare" la proprietà di generalizzazione di un
+Per ``convalidare'' la proprietà di generalizzazione di un
 insieme di regole, si utilizza un metodo che prevede, oltre
 al TS, un altro insieme di record già etichettati, detto
 \textbf{Control Set (CS)} o \textbf{Test Set}.
@@ -191,7 +192,7 @@ Combinare più feature (es. lunghezza e luminosità dei pesci)
 è spesso una strategia conveniente, ma non è detto che
 sia sempre la migliore.
 L'inclusione di troppe feature, specialmente se irrilevanti,
-può amplificare il "rumore" e confondere il classificatore.
+può amplificare il \"rumore\" e confondere il classificatore.
 
 Una buona pratica è scegliere feature che siano
 \textbf{invarianti} alle trasformazioni tipiche della
@@ -204,7 +205,7 @@ feature misurate e la classe da predire.
 I dati del mondo reale contengono inevitabilmente
 \textbf{rumore}, ovvero perturbazioni dovute a fenomeni
 non controllabili o non noti. Le cause di tale
-spostamento dai valori "ideali" possono essere:
+spostamento dai valori ``ideali'' possono essere:
 \begin{itemize}
     \item \textbf{Endogene}: Interne al fenomeno (es. un pesce
     con una dieta o storia anomala).
@@ -213,11 +214,11 @@ spostamento dai valori "ideali" possono essere:
     etichettatore distratto).
 \end{itemize}
 
-I dati molto "fuori norma" rispetto ai valori tipici di una
+I dati molto ``fuori norma'' rispetto ai valori tipici di una
 classe sono definiti \textbf{outlier}.
 Un buon algoritmo di classificazione deve essere
 \textbf{robusto}, ovvero deve avere una forma di
-"protezione" o resistenza alle deviazioni che il rumore
+``protezione'' o resistenza alle deviazioni che il rumore
 impone al processo decisionale.
 
 \subsection{Valutazione degli errori}
@@ -239,8 +240,8 @@ Ad esempio, in una diagnosi medica:
 
 Per analizzare questa asimmetria si usa la
 \textbf{matrice di confusione}. È una griglia quadrata
-che riporta quante istanze della classe "Reale" (sulle colonne)
-sono state assegnate alla classe "Prevista" (sulle righe).
+che riporta quante istanze della classe ``reale'' (sulle colonne)
+sono state assegnate alla classe ``prevista'' (sulle righe).
 
 Un classificatore perfetto ha come matrice di confusione la
 matrice identica (tutti i valori sulla diagonale principale,
