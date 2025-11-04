@@ -1,0 +1,764 @@
+%% blocco slide 4
+\section{Algoritmi di classificazione}
+
+\subsection{Tipologie di modelli di classificazione}
+
+I modelli di classificazione possono essere suddivisi in due tipologie:
+\begin{itemize}
+    \item \textbf{Eager (volenterosi)}: Costruiscono un modello generale e
+    indipendente dall'input a partire dai dati di addestramento.
+    Tale modello viene poi usato per classificare nuovi dati.
+    \item \textbf{Lazy (pigri)}: Memorizzano semplicemente i dati di
+    addestramento (in forma grezza o con piccole elaborazioni) e rimandano
+    l'intero processo di classificazione all'arrivo della nuova
+    istanza da classificare.
+\end{itemize}
+
+In generale, i metodi lazy richiedono meno tempo in fase di addestramento ma
+molto più tempo in fase di classificazione.
+Riguardo l'accuratezza, i metodi lazy usano uno spazio delle ipotesi più ricco,
+potendo usare funzioni locali di classificazione che forniscono approssimazioni
+a livello globale.
+Al contrario, i metodi eager si riferiscono a una sola ipotesi per coprire
+l'intero universo delle osservazioni.
+
+Approcci tipicamente lazy includono:
+\begin{itemize}
+    \item \textbf{k-nearest neighbors (kNN)} (i k vicini più prossimi): I
+    data point sono rappresentati in uno spazio euclideo.
+    \item \textbf{Locally weighted regression}: Costruisce approssimazioni
+    locali.
+    \item \textbf{Case-based reasoning}: Usa rappresentazione simbolica e
+    inferenza basata sulla conoscenza (knowledge-based inference).
+\end{itemize}
+
+\subsection{k-Nearest Neighbors (kNN)}
+
+Nel kNN, l'insieme delle osservazioni è rappresentato come un insieme di data
+point in uno spazio $n$-dimensionale, dove ogni dimensione può avere valori
+reali o discreti.
+
+Lo spazio è tipicamente euclideo (su cui si calcolano distanze euclidee),
+ma è possibile utilizzare anche feature categoriali con metriche diverse
+(es. Jaccard, Tanimoto, Dice, Hamming, distanza al coseno).
+
+\begin{definizione}{k-Nearest Neighbors (kNN)}
+Dato un training set (TS) e un'istanza da classificare, l'algoritmo assegna a
+tale istanza la classe che è più rappresentata tra i suoi \textbf{k} vicini
+più prossimi.
+
+\begin{center}
+\begin{tikzpicture}[
+    % --- Definiamo stili per i nodi ---
+    point/.style={minimum size=5pt, inner sep=0},
+    blue_point/.style={point, circle, fill=myblue},
+    green_point/.style={point, regular polygon, regular polygon sides=4, fill=mygreen},
+    red_point/.style={point, circle, fill=myred, line width=1pt, draw=black}
+]
+
+% 1. Disegnare il riquadro esterno
+\draw[draw=gray, fill=gray!10, rounded corners] (-4.5, -3) rectangle (4.5, 3.5);
+
+% 2. Aggiungere i titoli
+\node at (0, 3) {\Large KNN};
+\node at (0, -2) {\Large K = 3};
+
+% 3. Posizionare il punto da classificare (rosso)
+% Lo chiamiamo 'query' per poterlo referenziare
+\node (query) [red_point] at (0, 1) {};
+
+% 4. Posizionare i 3 vicini più prossimi (K=3)
+\node (b_near_1) [blue_point] at (-1.5, 1.5) {};
+\node (b_near_2) [blue_point] at (-1.5, 0) {};
+\node (g_near_1) [green_point] at (2, 1.2) {};
+
+% 5. Disegnare le frecce dal punto 'query' ai vicini
+\draw[->, thick, gray, -Stealth] (query) -- (b_near_1);
+\draw[->, thick, gray, -Stealth] (query) -- (b_near_2);
+\draw[->, thick, gray, -Stealth] (query) -- (g_near_1);
+
+% 6. Posizionare tutti gli altri punti (cluster)
+% --- Cluster Blu ---
+\node [blue_point] at (-3, 2.5) {};
+\node [blue_point] at (-2.5, 2) {};
+\node [blue_point] at (-3.5, 1.5) {};
+\node [blue_point] at (-2.8, 1) {};
+\node [blue_point] at (-3.2, 0.5) {};
+\node [blue_point] at (-2.2, 0.2) {};
+\node [blue_point] at (-3.8, -0.5) {};
+\node [blue_point] at (-3, -0.8) {};
+\node [blue_point] at (-2, -1) {};
+\node [blue_point] at (-3.5, -1.5) {};
+\node [blue_point] at (-2.5, -1.8) {};
+\node [blue_point] at (-1.8, -2.5) {};
+\node [blue_point] at (-3.0, -2.2) {};
+\node [blue_point] at (-3.9, 0.2) {};
+\node [blue_point] at (-4.0, 2.0) {};
+\node [blue_point] at (-2.0, 2.8) {};
+
+% --- Cluster Verde ---
+\node [green_point] at (3, 2.5) {};
+\node [green_point] at (2.5, 2) {};
+\node [green_point] at (3.5, 1.8) {};
+\node [green_point] at (2.8, 1) {};
+\node [green_point] at (3.2, 0.5) {};
+\node [green_point] at (2.2, 0.2) {};
+\node [green_point] at (3.8, -0.5) {};
+\node [green_point] at (3, -0.8) {};
+\node [green_point] at (2, -1) {};
+\node [green_point] at (3.5, -1.5) {};
+\node [green_point] at (2.5, -1.8) {};
+\node [green_point] at (1.8, -2.5) {};
+\node [green_point] at (3.0, -2.2) {};
+\node [green_point] at (4.0, 0.2) {};
+\node [green_point] at (1.5, -1.5) {};
+\node [green_point] at (3.8, 0.8) {};
+\node [green_point] at (4.2, 2.3) {};
+\end{tikzpicture}
+\end{center}
+
+\end{definizione}
+
+\begin{nota}{Il ruolo di k}{}
+    Il parametro $k$ è un punto chiave dell'algoritmo perché determina il
+    numero di vicini da considerare per la classificazione.
+\end{nota}
+
+Il kNN è uno strumento \textbf{non parametrico}, cioè non fa alcuna ipotesi
+sulla distribuzione dei dati.
+Questo è utile perché la maggior parte dei dati ``reali'' non obbedisce ad
+assunti teorici (come nei modelli di regressione lineare).
+
+Di conseguenza, kNN è spesso una delle prime scelte per uno studio di
+classificazione quando c'è poca o nessuna conoscenza sulla distribuzione
+dei dati.
+
+\subsubsection{Potere predittivo e scelta di k}
+Il potere predittivo dipende dal parametro $k$:
+\begin{itemize}
+    \item \textbf{k piccolo}: Limita la regione di previsione, rendendo il
+    classificatore ``più cieco'' alla distribuzione generale.
+    \item \textbf{k grande}: Riduce l'impatto della varianza e dell'errore
+    casuale, ma rischia di ignorare piccoli dettagli rilevanti.
+\end{itemize}
+
+Alcuni autori suggeriscono di impostare $k$ uguale alla radice quadrata del
+numero di osservazioni nel training set.
+Un'alternativa migliore è usare la cross-validazione per identificare il
+valore di $k$ con le performance migliori.
+
+\subsubsection{Weighted kNN}
+Per migliorare le performance, si può usare una versione pesata (Weighted kNN),
+dove le classi dei vicini sono pesate in base alla loro distanza.
+Ad esempio, si può pesare l'apporto di ogni vicino con l'inverso della sua
+distanza ($1/d_i$).
+
+\begin{nota}{Weighted kNN e dataset sbilanciati}{}
+Per dataset sbilanciati, si può anche pesare l'apporto di ogni vicino con
+l'inverso del numero totale di punti nel dataset aventi la stessa classe del
+vicino in questione.
+\end{nota}
+
+\subsection{Alberi di decisione}
+
+\begin{definizione}{Albero di decisione}
+Un albero di decisione descrive un albero di ricerca (n-ario) dove i nodi
+foglia rappresentano le classificazioni e le ramificazioni l'insieme delle
+proprietà che portano a quelle classificazioni.
+Ogni nodo interno contiene un test (tipicamente su una feature o una
+combinazione di feature) che stabilisce quale sotto-albero deve essere
+visitato.
+\end{definizione}
+
+\subsubsection{Costruzione dell'albero}
+L'algoritmo di costruzione (top-down, greedy) inizia con un nodo radice che
+contiene tutti i dati di addestramento e segue una strategia ricorsiva:
+\begin{enumerate}
+    \item Se tutti i dati di training in un nodo $t$ hanno lo stesso valore
+    sull'attributo classificatore, si crea un nodo foglia contenente
+    tutti i dati.
+    \item Altrimenti, si cerca la partizione $S$ degli elementi (basata su
+    un attributo) che massimizza una misura di ``goodness'' (purezza).
+    \item Si sceglie la partizione $S^*$ che massimizza la misura di
+    ``goodness''.
+    \item Si creano tanti figli del nodo $t$ quante sono le classi/valori
+    presenti in $S^*$.
+    \item Un nodo figlio è detto ``puro'' se tutti i suoi elementi hanno lo
+    stesso valore di classe.
+    \item Si applica ricorsivamente l'algoritmo sui nodi impuri (o che non
+    rappresentano una singola classe secondo una soglia di maggioranza).
+\end{enumerate}
+
+L'obiettivo è scegliere l'albero più semplice a parità di performance e il più
+compatto possibile. Trovare l'ipotesi minimale è NP-hard, per cui si usa
+questa strategia greedy (divide-et-impera) che non garantisce l'ottimalità.
+
+La decisione principale è scegliere l'attributo su cui biforcare in modo che
+divida in insiemi il più puri possibile e porti rapidamente a nodi foglia.
+
+\subsubsection{Goodness functions}
+
+Le misure di ``goodness'' (purezza) più utilizzate per scegliere l'attributo
+migliore per lo split sono:
+\begin{itemize}
+    \item \textbf{Information Gain (ID3, C4.5)}: Basato sulla riduzione
+    dell'entropia. Adatto per attributi categoriali (ma modificabile per
+    i continui).
+    \item \textbf{Indice di Gini (CART)}: Adatto per attributi continui,
+    assume che esistano diversi valori di splitting per ogni attributo
+    (tipicamente split binari).
+\end{itemize}
+
+\subsubsection{Information gain}
+
+La scelta basata sull'\textbf{information gain} mira alla riduzione
+progressiva dell'entropia.
+L'entropia $H$ misura il disordine (o l'incertezza media) di una variabile
+aleatoria.
+
+\[
+H(p_1, \ldots, p_k) = -\sum_{i}p_{i}\log_{b}p_{i}
+\]
+L'entropia è massima quando tutti gli eventi sono equiprobabili (massimo
+disordine).
+
+Dato un insieme $S$ con $k$ classi $C_i$, l'informazione (entropia)
+necessaria per classificare un campione in $S$ misura la \textbf{quantità di
+informazione media necessaria} ed è definita come:
+\[
+Info(S) = -\sum_{i=1}^{k}\frac{freq(C_{i},S)}{|S|}\log_{2}\frac{freq(C_{i},S)}{|S|}
+\]
+
+Se si partiziona $S$ usando un attributo $A$ (con $n$ valori) nei sottoinsiemi
+$\{S_1, \ldots, S_n\}$, l'entropia dell'albero con radice $A$ è la media ponderata
+delle entropie dei sottoinsiemi:
+\[
+Info_{A}(S) = \sum_{i=1}^{n}\frac{|S_{i}|}{|S|}Info(S_{i})
+\]
+
+La quantità di informazione guadagnata dal partizionamento di $S$
+è la riduzione dell'entropia ottenuta splittando sull'attributo $A$:
+\[
+Gain(A) = Info(S) - Info_{A}(S)
+\]
+L'algoritmo seleziona l'attributo $A$ che massimizza il
+$Gain(A)$ (o, equivalentemente, minimizza $Info_A(S)$).
+
+\begin{esempio}{Information gain con due classi}
+Sia $C$ l'insieme delle classi con due classi $C_1$ e $C_2$, e sia
+$S$ un insieme che contiene $c_1$ elementi di $C_1$ e $c_2$ elementi di $C_2$.
+
+La \textbf{quantità di informazione} necessaria per decidere se un elemento
+arbitrario in $S$ appartiene a $C_1$ o $C_2$ è:
+\[
+Info(c_1, c_2) = -\frac{c_1}{c_1 + c_2}\log_{2}\frac{c_1}{c_1 + c_2}
+- \frac{c_2}{c_1 + c_2}\log_{2}\frac{c_2}{c_1 + c_2}
+\]
+
+Assumendo di utilizzare un attributo $A$ con $v$ valori $\{a_1, a_2, \ldots, a_v\}$,
+come radice dell'albero, allora $S$ viene partizionato in $v$ sottoinsiemi
+$\{S_1, S_2, \ldots, S_v\}$.
+
+Così facendo $C_1$ e $C_2$ si dividono in $\{[C_1]_1, [C_1]_2, \ldots, [C_1]_v\}$ e
+$\{[C_2]_1, [C_2]_2, \ldots, [C_2]_v\}$.
+
+Se $S_i$ contiene $[c_{1}]_i$ elementi di $C_1$ e $[c_2]_i$ elementi di $C_2$,
+allora la quantità di informazione richiesta per classificare gli oggetti nei
+vari $S_i$ saranno $Info([c_{1}]_i, [c_{2}]_i)$.
+
+Di conseguenza l'informazione richiesta per l'albero con radice $A$ sarà la
+media pesata dagli $Info$ secondo le partizioni che $A$ impone su $S$:
+\[
+Info_{A}(S) = \sum_{i=1}^{v}\frac{[c_1]_i + [c_2]_i}{c_1 + c_2} Info([c_{1}]_i, [c_{2}]_i)
+\]
+
+\end{esempio}
+
+\begin{nota}{Sbilanciamento dell'Information Gain}{}
+L'Information gain è fortemente sbilanciato in favore dei test che hanno molti
+esiti (es. un attributo ID), anche se questi esiti sono poco significativi
+in termini di predizione.
+Come soluzione a questa problematica si normalizza il gain in base alla
+quantità di informazione ottibile da $S$ stesso.
+
+Considerando l'\textbf{informazione} contenuta da un messaggio sulla probabile
+partizione di $S$ in $S_i$ insiemi, si ha che tale informazione è data da:
+\[
+-\log_{2}\frac{|S_{i}|}{|S|}
+\]
+
+Per analogia la definizion di $Info(S)$ è porta alla definizione di
+$SplitInfo$, che rappresenta la potenziale informazione generata dalla
+divisione di $S$.
+\[
+SplitInfo(A) = -\sum_{i=1}^{n}\frac{|S_{i}|}{|S|}\log_{2}\frac{|S_{i}|}{|S|}
+\]
+
+Il \textbf{gain normalizzato}, ottenuto usando $SplitInfo$, è quindi:
+\[
+GainRatio(A) = \frac{Gain(A)}{SplitInfo(A)}
+\]
+
+Il GainRatio non risolve tutti i problemi, infatti potrebbe succedere che
+attributi significativi assumono un qualche valore in più rispetto agli altri
+risultando svantaggiati.
+
+Una strategia comune è:
+\begin{enumerate}
+    \item Calcolare il $Gain(A)$ per ogni attributo.
+    \item Calcolare la media dei guadagni.
+    \item Selezionare \textbf{solo} gli attributi con guadagno sopra la media.
+    \item Scegliere, tra gli attributi selezionati, quello con $GainRatio$ maggiore.
+\end{enumerate}
+
+\end{nota}
+
+
+\begin{nota}{Attributi continui}{}
+Per attributi di tipo continuo, si valuta l'utilizzo di un valore di soglia
+$Z$, che rende il test binario: $A > Z$ o $A \le Z$.
+
+Si testano tutti i possibili valori di soglia $v_j$ (o i punti medi tra valori
+ordinati) presenti nel training set e si sceglie la soglia che massimizza il
+gain.
+Così facendo l'insieme di dati viene diviso in due sottoinsiemi $\{v_1, v_2,
+\ldots, v_i\}$ e $\{v_{i+1}, v_{i+2}, \ldots, v_m\}$.
+
+Questo critero va ad introdurre implicitamente un'altra restizione, richiedendo
+che gli insiemi generati abbiano almeno un certo numero minimo di elementi.
+\end{nota}
+
+\begin{nota}{Gestione dei valori mancanti}{}
+
+Durante la costruzione dell'albero, può capitare che alcuni record
+abbiano valori mancanti (nulli) per alcuni attributi.
+Tra le varie opzioni per gestire questi casi, si possono usare varie strategie:
+\begin{itemize}
+    \item Assegnare il valore più comune per quell'attributo.
+    \item Assegnare una probabilità a ognuno dei possibili valori.
+    \item Attribuire un peso ai record.
+\end{itemize}
+
+In queste situazioni è necessario adattare il calcolo del $Gain(A)$:
+\[
+Gain(A) = F \cdot (Info(S) - Info_A(S))
+\]
+dove $F$ è la percentuale di casi nel training set in cui l'attributo $A$ è
+noto.
+
+La variazione sul calcolo del $Gain(A)$ può essere estesa anche al calcolo
+della $SplitInfo(A)$, e di conseguenza del $GainRatio(A)$, influendo così
+sul partizionamento.
+
+\bigskip
+
+Per pesare i singoli record, è necessario valutare che se un record ha un
+valore sconosciuto il peso è proprio la probabilità che il valore sia $v_i$.
+Ogni sottoinsieme $S_i$ è una collezione di casi con pesi possibilmente
+frazionali, così che $|S_i|$ può essere reinterpretata come la somma dei
+pesi frazionali dei casi del sottoinsieme.
+
+In generale, un caso di $S$ con peso $w$ il cui esito non è noto a ogni
+sotto insieme $S_i$ con peso $w^*$ ha la probabilità che l'esito sia $v_i$
+
+\end{nota}
+
+
+\subsubsection{Indice di Gini}
+
+\begin{definizione}{Indice di Gini}{}
+
+L'indice di Gini è una metrica utilizzata per valutare la purezza dei nodi e
+guidare la costruzione degli alberi.
+Questa misura l'impurità di un insieme $S$.
+
+Dato un insieme $S$ con $n$ classi, l'\textbf{indice di Gini} è definito come:
+\[
+gini(S) = 1 - \sum_{j=1}^{n}p_{j}^{2}
+\]
+dove $p_j$ è la frequenza della classe $j$:
+
+Definito questo è necessario adattare il calcolo dello split basato su Gini,
+definendo l'\textbf{indice di impurità dello split} come segue:
+\[
+gini_{split}(S, A) = \sum_{i=1}^{m}\frac{N_{i}}{N}gini(S_{i})
+\]
+dove $S$ è diviso in $m$ sottoinsiemi $S_i$ (di dimensione $N_i$) in base
+all'attributo $A$, e $N = \sum_{i=1}^{m} N_i$ è la dimensione totale di $S$.
+
+\end{definizione}
+
+
+\begin{esempio}{Indice di Gini con due classi}{}
+
+Date due classi $P$ e $N$, tale che $S = P \cup N$, contenenti rispettivamente
+$p$ e $n$ elementi, è possibile calcolare:
+\[
+p_p = \frac{p}{p + n}
+\]
+\[
+p_n = \frac{n}{p + n}
+\]
+\[
+gini(S) = 1 - p_{p}^{2} - p_{n}^{2}
+\]
+
+Da questo si può calcolare l'indice di Gini per lo split su un attributo
+$A$ che divide $S$ in due sottoinsiemi $S_1$ e $S_2$, rispettivamente con
+dimensioni $N_1$ e $N_2$.
+
+\[
+gini_{split}(S, A) = \frac{N_1}{N}gini(S_1) + \frac{N_2}{N}gini(S_2)
+\]
+
+\end{esempio}
+
+\begin{nota}{Algoritmo di CART}{}
+
+L'algoritmo CART (che usa Gini) seleziona l'attributo $a$ che ha il
+\textbf{minore} $gini_{split}(S, a)$, in quanto si cerca la massima riduzione
+dell'impurità. Per gli attributi numerici, CART testa tutti i possibili split
+binari.
+
+\end{nota}
+
+\subsubsection{Pruning}
+Un albero cresciuto molto in profondità rischia di adattarsi troppo ai dati di
+training, inclusi gli outlier e il rumore. Questa situazione è detta
+\textbf{overfitting} e porta a un aumento degli errori su dati nuovi.
+
+La soluzione è il \textbf{pruning} (potatura), ovvero la rimozione di parti
+dell'albero (rami) che non contribuiscono significativamente alla
+classificazione corretta, producendo un modello meno complesso e più
+generalizzabile.
+
+Le strategie di pruning sono:
+\begin{itemize}
+    \item \textbf{Pre-pruning}: Attuato durante la costruzione. Si decide di
+    non dividere ulteriormente un nodo se il gain è inferiore a una soglia
+    $t$, o se la purezza è già sufficiente (es. tramite metodi statistici).
+    \item \textbf{Post-pruning}: Attuato dopo la costruzione completa
+    dell'albero. Si recidono rami analizzando l'impatto sull'errore (spesso
+    su un validation set). È più dispendioso ma generalmente più efficace
+    (C4.5 usa il post-pruning).
+\end{itemize}
+
+\begin{nota}{Potature e distribuzione di probabilità}{}
+Quando si pota, la foglia risultante potrebbe non essere pura. Invece di una
+classe, le si associa una distribuzione di probabilità delle classi presenti.
+\end{nota}
+
+\paragraph{C4.5}
+C4.5 (Pessimistic Pruning) utilizza un post-pruning ``pessimistico'' basato sul
+set di training stesso.
+Stima l'errore di un sottoalbero e lo confronta con l'errore medio che si
+otterrebbe sostituendo il sottoalbero con una singola foglia (o, in C4.5,
+anche con uno dei suoi rami).
+Se l'errore stimato del sottoalbero potato è minore, il nodo viene potato.
+
+\paragraph{Minimal cost-complexity pruning}
+CART (minimal cost-complexity pruning) è un algoritmo di potatura
+parametrizzato da $\alpha \ge 0$ (parametro di complessità).
+
+Si definisce un costo di complessità $R_{\alpha}(T)$ per un albero $T$ come:
+\[
+R_{\alpha}(T) = R(T) + \alpha |\tilde{T}|
+\]
+dove $R(T)$ è il tasso di errore (impurità) dell'albero e $|\tilde{T}|$ è
+il numero di nodi terminali (foglie).
+L'algoritmo cerca il sottoalbero che minimizza $R_{\alpha}(T)$.
+
+
+Si calcola un $alpha$ effettivo, $\alpha_{eff}$ come seguente:
+\begin{itemize}
+    \item Se il nodo $t$ è una foglia, $R_{\alpha}(T_t) = R(t)$.
+    \item Altrimenti, per un nodo non terminale:
+    \[
+    \alpha_{eff} = \frac{R(t) - R(T_t)}{|T_t| - 1}
+    \]
+\end{itemize}
+Si pota iterativamente il nodo non terminale con il $\alpha_{eff}$ più
+piccolo.
+All'aumentare di $\alpha$, l'albero viene potato di più,
+l'impurità (errore sul training) aumenta, ma la generalizzazione
+(errore sul test) migliora fino a un certo punto ottimale, per poi peggiorare
+(underfitting).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_04/01.png}
+    \caption{All’aumentare di $\alpha$, viene potata una parte maggiore
+    dell’albero, il che aumenta l’impurità totale delle sue foglie.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_04/01.png}
+    \caption{Il numero di nodi e la profondità dell’albero diminuiscono
+    all’aumentare di $\alpha$}
+\end{figure}
+
+\begin{nota}{Valore di $\alpha$ e overfitting}{}
+    Quando il valore di soglia è impostato a $0$ (nessuna potatura), l'albero
+    va in overfitting, portando ad una precisione di allenamento del $100\%$
+    ma ad una precisione di test dell' $80\%$.
+
+    All'aumento di $\alpha$, viene tagliata una parte maggiore dell'albero,
+    creando così un albero decisionale che generalizza meglio.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_04/03.png}
+    \caption{Andamento dell’accuratezza in funzione di $\alpha$.}
+    \end{figure}
+
+\end{nota}
+\subsection{Metodi consenso}
+
+Gli alberi di decisione sono semplici e interpretabili, ma spesso non
+competitivi in termini di qualità predittiva.
+Inoltre, sono instabili, piccoli cambiamenti nei dati di training possono
+portare a un albero molto diverso (alta varianza).
+
+Per ovviare a questi svantaggi, si utilizzano differenti strategie tra cui
+\textbf{bagging}, \textbf{random forests}, e \textbf{boosting}, che
+costruiscono molteplici alberi e li combinano in un'unica predizione
+\textbf{consenso}, migliorando notevolmente l'accuratezza a scapito (parziale)
+dell'interpretabilità.
+
+L'obiettivo è impiegare una combinazione di modelli $M^*$, ottenuta
+combinando $k$ modelli addestrati separatamente, per incrementare
+l'accuratezza. I metodi più popolari sono:
+\begin{itemize}
+    \item \textbf{Bagging}: Media la predizione su una collezione di
+    classificatori.
+    \item \textbf{Boosting}: Impiega una collezione di classificatori tramite
+    un voto pesato.
+    \item \textbf{Ensemble}: Combina un insieme eterogeneo di classificatori.
+\end{itemize}
+
+\subsubsection{Bagging}
+
+Il bagging (Bootstrap Aggregation) è una tecnica generale per ridurre la
+varianza di un metodo statistico, particolarmente utile per gli alberi
+di decisione.
+
+L'idea è simulare la disponibilità di più training set, anche se se ne ha
+uno solo:
+\begin{enumerate}
+    \item Si estraggono $B$ diversi sottoinsiemi (campioni \textbf{bootstrap})
+    dall'unico training set (estraendo casualmente con reinserimento).
+    \item Si apprende un classificatore (un albero) $f_i$ per ciascun
+    sottoinsieme $i$.
+    \item Si aggregano (ensemble) le predizioni sulle nuove istanze $x$ di test:
+    \[
+    f_{bag}(x) = \frac{1}{B} \sum_{i=1}^{B} f_i(x)
+    \]
+\end{enumerate}
+
+
+\subsubsection{Random Forest}
+Una Random Forest è un metodo consenso costituito da un
+\textbf{bagging di alberi di decisione non potati} (complessi), con
+un'aggiunta cruciale: \textbf{una scelta casuale di un sottoinsieme delle
+feature (predittori) ad ogni split}.
+
+\begin{nota}{Metodologia}{}
+    La random forest è un metodo non lineare (come gli alberi di decisione)
+    e robusto, con bassa varianza e stabilità delle predizioni rispetto al
+    variare dei dati di input.
+    
+    Migliora le prestazioni di un singolo albero di decisione appreso su
+    tutti i dati ma perde la facile interpretabilità e scala meno bene.
+\end{nota}
+
+\paragraph{Addestramento della foresta}
+Fissato un numero di alberi $n_{tree}$ e il numero di predittori (numero di
+feature da testare a ogni split) $m_{try}$ da scegliere casualmente tra quelle
+disponibili, viene ripetuto per $n_{tree}$ la procedura seguente:
+\begin{enumerate}
+    \item Si estrae un campione bootstrap $S$ dai dati di training.
+    \item Si apprende un albero di decisione su $S$ accurato (minsplit = 1),
+    in cui ad ogni split solo $m_{try}$ predittori sono scelti casualmente
+    come candidati.
+    \item Non viene effettuato il pruning.
+    \item Si salva l'albero ottenuto tra quelli disponibili.
+\end{enumerate}
+
+\paragraph{Predizione}
+Si aggregano le predizioni degli $n_{tree}$ alberi tramite voto di maggioranza
+(classificazione) o media (regressione).
+
+\begin{nota}{Scelta di $m_{try}$}{}
+Di solito, $m_{try} \approx \sqrt{m}$ per la classificazione e
+$m_{try} \approx m/3$ per la regressione (dove $m$ è il numero totale di
+feature).
+\end{nota}
+
+\begin{nota}{Costruzione raffinata}{}
+Il bagging riduce la varianza mediando alberi non distorti (perché profondi)
+ma soggetti a errore (alta varianza).
+La varianza di una media di $B$ variabili i.i.d. (indipendenti e identicamente
+distribuite) con varianza $\sigma^2$ è $\frac{1}{B}\sigma^2$.
+
+Tuttavia, gli alberi del bagging non sono indipendenti, perché crescono dallo
+stesso TS (anche se bootstrapped).
+Sono correlati. Se la correlazione a coppie è $\rho > 0$, la varianza della
+media è:
+\[
+\rho\sigma^2 + \frac{1-\rho}{B}\sigma^2
+\]
+Al crescere di $B$, la varianza non va a zero, ma tende a $\rho\sigma^2$.
+
+L'idea della Random Forest è \textbf{ridurre la correlazione $\rho$} tra gli
+alberi. Introducendo la selezione casuale di $m_{try}$ feature ad ogni split,
+si ``decorrelano'' gli alberi. Questo permette di migliorare la riduzione della
+varianza del bagging, senza accrescere troppo la distorsione (bias).
+\end{nota}
+
+\paragraph{Valutazione (OOB error):}
+Le RF forniscono una \textbf{stima dell'errore} di test chiamata
+\textbf{Out-Of-Bag (OOB) error}.
+Per ogni istanza di training $x_i$, si usano per la predizione solo gli alberi
+che *non* contenevano $x_i$ nel loro campione bootstrap (circa 1/3 degli alberi).
+L'OOB error è la media degli errori su queste predizioni.
+
+\paragraph{Importanza delle features}
+
+Si può stimare l'importanza di una feature in due modi:
+\begin{itemize}
+    \item \textbf{Mean decrease in accuracy (permutation importance)}: Si
+    calcola l'accuratezza OOB. Poi, per una feature $i$, si permutano
+    casualmente i suoi valori nei dati OOB (rompendo la correlazione con la
+    classe). Si ricalcola l'accuratezza. La differenza media (su tutti gli
+    alberi) nella precisione è l'importanza di quella feature.
+    \item \textbf{Mean decrease in Gini index:} Si misura quanto lo split su
+    una certa variabile riduce (in media) l'impurità (indice di Gini)
+    attraverso tutti gli alberi.
+\end{itemize}
+
+
+\begin{nota}{Vantaggi}{}
+Le random forest (RF) presentano diversi vantaggi chiave rispetto ai singoli alberi
+decisionali:
+\begin{itemize}
+    \item \textbf{Scalabilità}: La complessità temporale aumenta in modo
+    contenuto, poiché ogni albero viene addestrato solo su un sottoinsieme di
+    dati e, ad ogni split, viene considerato solo un sottoinsieme di
+    predittori. Questo permette di gestire efficientemente anche dati di
+    grandi dimensioni.
+    \item \textbf{Resistenza all'Overfitting}: Le RF generalmente non soffrono
+    di overfitting all'aumentare del numero di alberi. Ciò è dovuto alla
+    combinazione della selezione casuale dei predittori a ogni split e
+    all'aggregazione finale delle predizioni.
+    \item \textbf{Stabilità}: Grazie all'uso del bagging, le RF sono più
+    stabili rispetto alle variazioni nei dati di input.
+    \item \textbf{Parallelizzabilità}: Gli alberi in una RF vengono appresi in
+    modo indipendente (a differenza del boosting). Questo rende l'algoritmo
+    facilmente parallelizzabile su hardware multi-core o multi-processore.
+\end{itemize}
+\end{nota}
+
+
+\begin{nota}{Svantaggi e limiti}{}
+Random forest non è ideale per:
+\begin{itemize}
+    \item \textbf{Estrapolazione}: La regressione casuale della foresta non è l’ideale
+    nell’estrapolazione dei dati (a differenza della regressione lineare, che
+    utilizza le osservazioni esistenti per stimare i valori oltre l’intervallo di
+    osservazione).
+    \item \textbf{Scarsità dei dati}: Una RF non produce buoni
+    risultati quando i dati sono molto scarsi (il sottoinsieme di funzionalità
+    e il campione bootstrap produrranno uno spazio invariante, portando a
+    divisioni improduttive che influenzeranno il risultato finale).
+\end{itemize}
+
+\end{nota}
+
+\subsubsection{Boosting}
+Il Boosting è un altro metodo consenso.
+\begin{nota}{Idea del Boosting: analogia medica}{}
+    L'idea del boosting può essere paragonata a quella di ``consultare diversi
+    medici, assegnando un peso alla loro diagnosi in base all'accuratezza
+    delle diagnosi precedenti''.
+\end{nota}
+
+L'idea è addestrare una serie di $k$ classificatori (spesso alberi semplici,
+detti ``weak learners'') in modo \textbf{sequenziale}:
+\begin{enumerate}
+    \item Le tuple in $D$ vengono campionate con ``replacement'' (rimettendo
+        una coppia in $D$ dopo l'estrazione) per formare un training set $D_i$
+        della stessa dimensione di $D$.
+    \item La probabilità di ogni tupla di essere selezionato è proporzionale
+    al suo peso.
+    \item Si addestra un classificatore $M_i$ a partire da $D_i$.
+    \item Viene calcolato il tasso di errore di $M_i$ utilizzando $D_i$ come
+    test set.
+    \item Le tuple classificate erroneamente vedono aumentare il loro peso,
+    altrimenti (se classificate correttamente) il loro peso diminuisce.
+\end{enumerate}
+
+\paragraph{Adaboost}
+Adaboost (Adaptive Boosting) è l'algoritmo di boosting più utilizzato.
+Dato $err(X_j)$ l'errore nel classificare la tupla $X_j$ ($0$ o $1$
+nei casi di classificazione e non di regressione). Con questo posso definire
+l'errore complessivo del classificatore $M_i$ come:
+\[
+err(M_i) = \sum_{j=1}^{d} w_j err(X_j)
+\]
+dove $w_j$ è il peso corrente della tupla $X_j$.
+
+Il peso del classificatore $M_i$ nella vorazione consenso è definito come:
+\[
+\log{\frac{1- error(M_i)}{error(M_i)}}
+\]
+
+
+\subsection{Support vector machines}
+
+Le SVM (Macchine a vettori di supporto), introdotte da Vapnik (basate sulla
+statistical learning theory), sono uno strumento molto usato per la
+classificazione.
+Invece di stimare le densità di probabilità (come i classificatori Bayesiani),
+SVM cerca di determinare direttamente la \textbf{superficie decisionale}
+(classification boundary) tra le classi.
+
+SVM nasce come classificatore binario e si estende a:
+\begin{itemize}
+    \item SVM lineare (dati linearmente separabili).
+    \item SVM lineare (dati non linearmente separabili, soft margin).
+    \item SVM non lineare (kernel).
+    \item Estensione multiclasse.
+\end{itemize}
+
+Date due classi linearmente separabili, esistono infiniti iperpiani in grado
+di separarle.
+SVM determina l'iperpiano che separa le due classi con il
+\textbf{maggior margine} possibile.
+
+Il \textbf{margine} è la distanza minima tra i punti delle due classi
+(nel training set) e l'iperpiano stesso.
+
+\begin{nota}{Importanza del margine}{}
+La massimizzazione del margine è legata alla generalizzazione, se i dati di
+training sono classificati con ampio margine, si spera che anche i dati di
+test vicini al confine siano gestiti correttamente.
+\end{nota}
+
+\subsubsection{SVM Lineari (Dati Linearmente Separabili)}
+
+Date due \textbf{classi linearmente separabili} e un training set $TS$
+contenente $n$ campioni di coordinate $(x_1, y_1), (x_2, y_2), \ldots, (x_n, y_n)$,
+dove $x_i \in \mathbb{R}^d$ sono i \textbf{record multidimensionali} e
+$y_i \in \{+1, -1\}$ sono le etichette di classe, esistono diversi
+\textbf{iperpiani} in grado di eseguire la separazione voluta.
+
+% TODO aggiungere immagine
+
+Un generico iperpiano è definito dai parametri $(w, b)$ come (omettendo per
+semplicità il prodotto scalare):
+\[
+D(x) = w \cdot x + b = 0
+\]
+dove $w$ è il vettore normale all'iperpiano e $\frac{b}{||w||}$ è la distanza
+dall'origine.

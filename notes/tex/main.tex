@@ -8,17 +8,24 @@
 \usepackage{tikz}
 \usepackage{multirow}
 
-\usetikzlibrary{positioning, arrows.meta}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric,backgrounds}
 
 
-% colori per abbinare l'immagine
+% --- colori per i grafici (th_03) ---
 \definecolor{fn_bg}{HTML}{D9EAD3} % Sfondo verde chiaro per 'false negatives'
 \definecolor{tn_bg}{HTML}{EFEFEF} % Sfondo grigio chiaro per 'true negatives'
 \definecolor{tp_fill}{HTML}{B6D7A8} % Verde più scuro per 'true positives'
 \definecolor{fp_fill}{HTML}{F4CCCC} % Rosso chiaro per 'false positives'
 \definecolor{datapoint}{HTML}{666666} % Grigio per i punti
 \definecolor{fn_area}{HTML}{8A9A83} % Verde/Grigio scuro per area 'relevant' (FN)
+% ---------------------------------
 
+
+% --- colori per i punti (th_04) ---
+\definecolor{myblue}{RGB}{0, 0, 200}
+\definecolor{mygreen}{RGB}{0, 170, 0}
+\definecolor{myred}{RGB}{200, 0, 0}
+% ---------------------------------
 
 \renewcommand{\coursetitle}{Algoritmi per l'intelligenza artificiale}
 
@@ -44,6 +51,7 @@
 \include{lectures/th_01}
 \include{lectures/th_02}
 \include{lectures/th_03}
+\include{lectures/th_04}
 
 
 
