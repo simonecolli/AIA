@@ -279,7 +279,7 @@ L'Information gain è fortemente sbilanciato in favore dei test che hanno molti
 esiti (es. un attributo ID), anche se questi esiti sono poco significativi
 in termini di predizione.
 Come soluzione a questa problematica si normalizza il gain in base alla
-quantità di informazione ottibile da $S$ stesso.
+quantità di informazione ottenibile da $S$ stesso.
 
 Considerando l'\textbf{informazione} contenuta da un messaggio sulla probabile
 partizione di $S$ in $S_i$ insiemi, si ha che tale informazione è data da:
@@ -287,7 +287,7 @@ partizione di $S$ in $S_i$ insiemi, si ha che tale informazione è data da:
 -\log_{2}\frac{|S_{i}|}{|S|}
 \]
 
-Per analogia la definizion di $Info(S)$ è porta alla definizione di
+Per analogia la definizione di $Info(S)$ è porta alla definizione di
 $SplitInfo$, che rappresenta la potenziale informazione generata dalla
 divisione di $S$.
 \[
@@ -324,7 +324,7 @@ gain.
 Così facendo l'insieme di dati viene diviso in due sottoinsiemi $\{v_1, v_2,
 \ldots, v_i\}$ e $\{v_{i+1}, v_{i+2}, \ldots, v_m\}$.
 
-Questo critero va ad introdurre implicitamente un'altra restizione, richiedendo
+Questo criterio va ad introdurre implicitamente un'altra restrizione, richiedendo
 che gli insiemi generati abbiano almeno un certo numero minimo di elementi.
 \end{nota}
 
@@ -708,7 +708,7 @@ err(M_i) = \sum_{j=1}^{d} w_j err(X_j)
 \]
 dove $w_j$ è il peso corrente della tupla $X_j$.
 
-Il peso del classificatore $M_i$ nella vorazione consenso è definito come:
+Il peso del classificatore $M_i$ nella votazione consenso è definito come:
 \[
 \log{\frac{1- error(M_i)}{error(M_i)}}
 \]
