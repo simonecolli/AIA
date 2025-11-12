@@ -10,7 +10,6 @@ quattro rami principali:
     \item Apprendimento non supervisionato (unsupervised).
     \item Apprendimento per rinforzo (reinforcement learning).
 \end{itemize}
-
 La distinzione primaria tra queste metodologie di ML risiede nel
 livello di disponibilità dei ``dati di verità di base'' (ground truth).
 Il \textbf{ground truth} è definito come la conoscenza preliminare dell'output
@@ -22,7 +21,6 @@ diretta in contrapposizione all'inferenza.
 L'apprendimento automatico supervisionato ha come obiettivo l'apprendimento di
 una funzione che, dato un \textbf{campione di dati} e i relativi output desiderati,
 riesca ad approssimare la funzione sottostante che mappa gli input agli output.
-
 Questa metodologia è comunemente applicata in due principali contesti:
 \begin{itemize}
     \item \textbf{Classificazione}: quando si desidera mappare l'input a
@@ -30,31 +28,29 @@ Questa metodologia è comunemente applicata in due principali contesti:
     \item \textbf{Regressione}: quando l'obiettivo è mappare l'input a un
     output continuo.
 \end{itemize}
-
 In entrambi i casi, lo scopo è identificare relazioni o strutture specifiche
 nei dati di input che consentano di generare output corretti in modo efficace.
 È fondamentale notare che la correttezza dell'output è determinata interamente
 dai dati di addestramento, i quali costituiscono la ``verità di base'' che il
 modello apprende.
 
-Tuttavia, l'efficacia del modello può essere significativamente ridotta dalla
+L'efficacia del modello può essere significativamente ridotta dalla
 presenza di etichette ``rumorose'' o ``errate'' all'interno dei dati stessi.
 Algoritmi notevoli nell'apprendimento supervisionato includono la regressione
 logistica, il classificatore bayesiano naif, le macchine a vettori di supporto,
 le reti neurali artificiali e le foreste casuali.
-
 Il successo di un modello di ML dipende dalla sua capacità di
 generalizzazione. Questo concetto è strettamente connesso alla complessità del
 modello, che si riferisce alla complessità della funzione che si sta cercando
 di apprendere.
 Se si dispone di una quantità limitata di dati o se questi non sono distribuiti
 uniformemente, è cruciale optare per un modello a bassa complessità per evitare
-situazioni di \textbf{overfitting} (sovradattamento).
-L'overfitting si verifica quando il modello apprende la funzione adattandosi
+situazioni di overfitting.
+
+L'\textbf{overfitting} (sovradattamento) si verifica quando il modello apprende la funzione adattandosi
 troppo bene ai soli dati di addestramento, senza cogliere la tendenza o la
 struttura effettiva che guida l'output, e quindi non riesce a generalizzare
 a nuovi punti dati.
-
 La gestione della generalizzazione è formalizzata tramite il compromesso
 \textbf{bias-varianza} (bias-variance tradeoff).
 Così facendo il modello presenterà un equilibrio tra:
@@ -64,46 +60,59 @@ Così facendo il modello presenterà un equilibrio tra:
     \item \textbf{Varianza}: la quantità in base alla quale l'errore può
     variare tra diversi set di dati.
 \end{itemize}
-
 La difficoltà si presenta nel creare un modello che cattura accuratamente le
 regolarità dei dati di addestramento e che sia in grado di generalizzare bene
 a dati non visti in precedenza.
-
 Generalmente, un aumento del bias (e una conseguente riduzione della
 varianza) porta a modelli con livelli di prestazione più stabili e
 garantiti, un fattore che può essere cruciale in certe applicazioni.
 Per ottenere una buona generalizzazione, la varianza del
 modello deve essere attentamente bilanciata in base alla dimensione e
-alla complessità dei dati di addestramento. Nello specifico,
-set di dati piccoli e semplici dovrebbero essere gestiti con modelli a
-bassa varianza, mentre set di dati grandi e complessi richiedono
-modelli con una varianza più elevata per poter catturare appieno la
-struttura sottostante dei dati.
+alla complessità dei dati di addestramento.
+
+\begin{nota}{Gestione dei dataset}{}
+    Set di dati piccoli e semplici dovrebbero essere gestiti con modelli a
+    bassa varianza, mentre set di dati grandi e complessi richiedono
+    modelli con una varianza più elevata per poter catturare appieno la
+    struttura sottostante dei dati.
+\end{nota}
 
 \subsection{Apprendimento automatico semi-supervisionato}
 
 L'apprendimento automatico semi-supervisionato (semi-supervised)
-mira a \textbf{etichettare i punti dati senza etichetta}.
-Per fare ciò, utilizza le conoscenze apprese da un
-piccolo numero di dati già etichettati.
-
-Questa tecnica è utile in scenari dove ottenere dati etichettati è
-costoso o complesso. Ad esempio, nel rilevamento di messaggi
-inappropriati in un social network, è impraticabile etichettare
-manualmente ogni messaggio. Si può, invece, etichettare
-manualmente un piccolo sottoinsieme e usare tecniche
-semi-supervisionate per comprendere e classificare il resto dei
-contenuti.
-
+mira a \textbf{etichettare i punti dati senza etichetta}
+sfruttando la conoscenza appresa da un piccolo numero di dati già etichettati.
 Metodi comuni includono le \textbf{macchine vettoriali di supporto
 trasversali} e i \textbf{metodi basati su grafi} (come la
 propagazione delle etichette).
+\begin{nota}{Vantaggi dell'apprendimento semi-supervisionato}{}
+    L'apprendimento semi-supervisionato può migliorare significativamente
+    le prestazioni del modello rispetto all'apprendimento supervisionato
+    quando si dispone di una quantità limitata di dati etichettati.
+    La quantità di dati etichettati limitata si può presentare in
+    diversi scenari, come ad esempio:
+    \begin{itemize}
+        \item Dati etichettati costosi da ottenere (ad esempio, richiedono
+        l'intervento umano).
+        \item Dati etichettati difficili da ottenere (ad esempio, richiedono
+        competenze specialistiche).
+        \item Dati etichettati soggetti a vincoli di privacy o etici.
+    \end{itemize}
+\end{nota}
+
+\begin{esempio}{Rilevamento di messaggi inappropriati}{}
+    Nel rilevamento di messaggi inappropriati in un social network,
+    è impraticabile etichettare manualmente ogni messaggio.
+    Si può, invece, etichettare manualmente un piccolo sottoinsieme
+    e usare tecniche semi-supervisionate per comprendere e classificare
+    il resto dei contenuti.
+\end{esempio}
 
 \subsubsection{Presupposti dell'apprendimento semi-supervisionato}
 
-Per poter giustificare l'uso di pochi dati etichettati per trarre
+Per poter giustificare l'utilizzo di pochi dati etichettati per trarre
 conclusioni su un grande insieme di dati non etichettati, i metodi
-semi-supervisionati si basano su alcuni presupposti fondamentali:
+semi-supervisionati si basano su alcuni presupposti fondamentali, quali:
 \begin{itemize}
     \item \textbf{Continuità}: Si assume che punti dati ``vicini'' tra
     loro abbiano maggiori probabilità di condividere la stessa
@@ -124,35 +133,30 @@ semi-supervisionati si basano su alcuni presupposti fondamentali:
 \subsection{Apprendimento automatico non supervisionato}
 
 L'apprendimento automatico non supervisionato (unsupervised)
-opera \textbf{senza output etichettati}. Il suo
-obiettivo principale è quindi quello di \textbf{dedurre la
-struttura naturale} presente all'interno di un insieme di
-dati.
-
-Questi metodi cercano di trovare modelli (pattern) intrinseci
-nei dati. Le attività più comuni in questo ambito
-sono:
+opera \textbf{senza output etichettati}. L'obiettivo principale
+di questa tecnica è quello di \textbf{dedurre la
+struttura naturale} presente all'interno di un insieme di dati,
+cercando di trovare \textbf{pattern} intrinseci
+nei dati. Le attività più comuni in questo ambito includono:
 \begin{itemize}
-    \item Il \textbf{clustering} (raggruppamento).
-    \item L'apprendimento della \textbf{rappresentazione}
+    \item \textbf{Clustering} (raggruppamento).
+    \item \textbf{Apprendimento della rappresentazione}
     (representation learning).
-    \item La \textbf{stima della densità} (density estimation).
+    \item \textbf{Stima della densità} (density estimation).
 \end{itemize}
 In tutti questi casi, si desidera comprendere la struttura
 intrinseca dei dati senza usare etichette fornite
 esplicitamente.
+Tecniche comuni includono il \textbf{clustering}, l'analisi
+dei componenti principali (\textbf{PCA}) e gli \textbf{autocodificatori}
+(autoencoders). Le due principali sono il clustering
+e la riduzione della dimensionalità dei dati.
 
-Algoritmi comuni includono il \textbf{clustering}, l'analisi
-dei componenti principali (\textbf{PCA}) e gli
-\textbf{autocodificatori} (autoencoders).
-
+\begin{nota}{Valutazione delle prestazioni}{}
 Dato che non vengono fornite etichette, nella maggior parte
 dei metodi di apprendimento non supervisionato non esiste un
 modo specifico per confrontare le prestazioni del modello.
-
-Le due tecniche principali per affrontare problemi di
-apprendimento non supervisionato sono il clustering
-e la riduzione della dimensionalità dei dati.
+\end{nota}
 
 \subsubsection{Clustering}
 
@@ -171,15 +175,16 @@ La riduzione della dimensionalità senza supervisione è un
 approccio molto usato nella \textbf{pre-elaborazione delle
 features}. L'obiettivo principale di questa tecnica è
 di \textbf{eliminare il ``rumore''} dai dati.
-
-Questa operazione può talvolta causare una minore prestazione
-predittiva. Tuttavia, può anche rendere lo spazio
-dimensionale più compatto, aiutando a \textbf{mantenere le
-informazioni più rilevanti}.
-Inoltre, è molto utile per la \textbf{rappresentazione dei dati}:
+Un altro utilizzo si trova nella \textbf{rappresentazione dei dati}:
 dati in uno spazio delle caratteristiche ad elevata dimensionalità
 possono essere proiettati su uno spazio 1D, 2D o 3D per
 l'analisi visiva.
+
+\begin{nota}{Compromesso tra riduzione della dimensionalità e prestazioni}{}
+    Questa operazione può talvolta causare una minore prestazione predittiva.
+    Ma può anche rendere lo spazio dimensionale più compatto, aiutando a
+    \textbf{mantenere le informazioni più rilevanti}.
+\end{nota}
 
 \subsubsection{Analisi esplorativa}
 
