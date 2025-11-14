@@ -4,35 +4,60 @@
 La classificazione è un'attività dell'apprendimento supervisionato che
 consiste nell'assegnare un'etichetta (o classe) a un dato
 sulla base di sue caratteristiche osservabili.
-
 Nell'ambito della classificazione si parla di:
 \begin{itemize}
-    \item \textbf{Feature} (caratteristiche): un aspetto direttamente
+    \item \textbf{Feature} (caratteristica): un aspetto direttamente
     osservabile di un fenomeno per il quale si può registrare una
     misura, che sia quantitativa (numerica) o categoriale
-    (come vero/falso, rosso/verde, ecc.).
+    (come vero/falso, rosso/verde, ecc..).
     \item \textbf{Classe}: un concetto astratto
     e generale che ``spiega'' le osservazioni. L'assegnazione
     a una classe costituisce una sintesi delle feature osservate.
-    \item \textbf{Label} (o etichetta): il nome specifico di una classe.
+    \item \textbf{Label} (etichetta): il nome specifico di una classe.
 \end{itemize}
 
-Tuttavia, alcuni dati possono rendere più complesso
-l'assegnazione delle classi; questi esempi sono tecnicamente noti come
-\textbf{outlier statistici}.
+\begin{nota}{Problematica della classificazione}{}
 
-\begin{definizione}{Classificazione}
-Data una \textbf{collezione di dati}, definita come un insieme $P$
-di $M$-uple del tipo:
-\[
-m_i = (x_{1i}, \ldots, x_{Mi}) \in D_1 \times \ldots \times D_M
-\]
-dove ogni $x_{ji}$ rappresenta una feature ed appartiene ad un possibile
-dominio di valori $D_j$.
+    Alcuni dati possono rendere più complesso l'assegnazione delle classi.
+    Questa tipologia di dati è nota come \textbf{outlier statistici}.
 
-L'insieme $P$ è partizionato in $k$ classi, le cui etichette
-compongono l'insieme $L = (A_1, \ldots, A_k)$.
+\end{nota}
 
+\begin{definizione}{Collezione di dati}{def:collezione_dati}
+    Una collezione di dati è un insieme di elementi $P$ di $M$-uple
+    del tipo:
+    \[
+    m_i = (x_{1i}, \ldots, x_{Mi}) \in D_1 \times \ldots \times D_M
+    \]
+    dove ogni $x_{ji}$ rappresenta una feature ed appartiene ad un possibile
+    dominio di valori $D_j$.
+    Ogni feature $x_{ji}$ appartiene a un dominio di valori $D_j$.
+    I domini possono essere:
+    \begin{itemize}
+        \item \textbf{Numerici:} (es. $\mathbb{R}$ per valori continui,
+        $\mathbb{Z}$ per discreti).
+        \item \textbf{Categoriali:} Insiemi finiti di valori (es.
+        \{Rosso, Verde, Blu\}).
+    \end{itemize}
+\end{definizione}
+
+\begin{definizione}{Partizionamento in classi }{def:partizionamento_classi}
+Data una collezione di dati \Cref{def:collezione_dati} $P$ e
+un insieme finito di $k$ \textbf{etichette} (o classi) $L = \{A_1, \ldots, A_k\}$.
+
+Si dice che $P$ è \textbf{partizionato in classi} se $P$ è suddiviso in
+$k$ sottoinsiemi $\{C_1, \ldots, C_k\}$, tali che:
+\begin{itemize}
+    \item $C_j \subseteq P$, $\forall j \in \{1, \ldots, k\}$
+    \item $C_i \cap C_j = \emptyset$, $\forall i \neq j$ (le classi sono
+    mutuamente esclusive)
+    \item $\bigcup_{j=1}^k C_j = P$ (l'unione delle classi copre l'intero dataset)
+\end{itemize}
+Ogni sottoinsieme $C_j$ raggruppa tutti e soli gli elementi $m_i \in P$
+che sono stati associati all'etichetta (classe) $A_j \in L$.
+\end{definizione}
+
+\begin{definizione}{Algoritmo di classificazione}{def:alg_classificazione}
 Un \textbf{algoritmo di classificazione} è una funzione computabile
 $f: P \mapsto L$, tale che:
 \[
@@ -50,14 +75,16 @@ Lo schema di classificazione può produrre due tipi di risultati:
 
 \end{definizione}
 
+\begin{nota}{Classificatori \textit{error free}}{}
 È generalmente impossibile creare classificatori \textit{error free}.
-È quindi fondamentale fornire stime sul tasso percentuale di hit/miss
-che lo schema può ottenere. Il livello tollerabile di errore
-dipende dalla \textbf{criticità dell'applicazione}: per applicazioni
-industriali si può richiedere un tasso $< 5\%$, mentre per
-applicazioni mediche un tasso $> 0.5\%$ potrebbe essere
-già inaccettabile.
+Per questo motivo è fondamentale fornire stime sul tasso percentuale di
+hit/miss.
 
+Il livello tollerabile di errore dipende dalla \textbf{criticità
+dell'applicazione}: per applicazioni industriali si può richiedere un
+tasso $< 5\%$, mentre per applicazioni mediche un tasso $> 0.5\%$
+potrebbe essere già inaccettabile.
+\end{nota}
 
 \begin{esempio}{Problema di classificazione: salmoni e branzino}{ex:salmoni_branzino}
 
@@ -108,13 +135,27 @@ il fenomeno dell'apprendimento umano o animale, noto come
 generali}, applicabili a record non ancora classificati,
 partendo dall'osservazione di esempi già noti e ben classificati.
 
-Si definisce \textbf{universo delle osservazioni} l'insieme
-complessivo dei record (passati, presenti e futuri) relativi ad un fenomeno.
-Molti algoritmi iniziano esaminando un sottoinsieme di questo
-universo, già classificato e ben compreso.
+Gli algoritmi e le tecniche di classificazione automatica sono
+numerosissimi. Tutti i metodi noti condividono uno \textbf{schema
+generale} (Figura \ref{fig:th_02_01}) ben testato e riconosciuto dalla comunità scientifica.
 
-Questo insieme di ``allenamento'', chiamato \textbf{Training Set (TS)},
-è il deposito di informazioni iniziali da cui l'algoritmo
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_02/01.png}
+    \caption{Schema generale di un sistema di classificazione}
+    \label{fig:th_02_01}
+\end{figure}
+
+\begin{definizione}{Universo delle osservazioni}{def:universo_osservazioni}
+    Si definisce \textbf{universo delle osservazioni} l'insieme
+    complessivo dei record (passati, presenti e futuri) relativi ad un fenomeno.
+    Molti algoritmi iniziano esaminando un sottoinsieme di questo
+    universo, già classificato e ben compreso.
+\end{definizione}
+
+Un universo delle osservazioni \Cref{def:universo_osservazioni} 
+che rappresenta l'insieme di ``allenamento'', chiamato \textbf{Training Set
+(TS)}, è il deposito di informazioni iniziali da cui l'algoritmo
 ricava le ``regole'' di classificazione. Le regole ricavate saranno di vario
 tipo: statistiche, probabilistiche, fuzzy, funzioni discendenti, ecc.
 
@@ -134,16 +175,17 @@ importanti proprietà:
     dei record dell'universo (dati nuovi, non visti).
 \end{itemize}
 
-\textbf{Statisticamente corretto} è un termine che indica che il tasso dei
-miss non deve superare certe soglie di tolleranza che dipendono
+\begin{nota}{}{}
+Il termine \textbf{statisticamente corretto} su un training set indica che il
+tasso dei miss non deve superare certe soglie di tolleranza che dipendono
 dalla criticità delle applicazioni.
+\end{nota}
 
 \subsection{Il problema dell'overfitting}
 
 Le proprietà di correttezza sul TS e di generalizzabilità sono
 spesso in conflitto tra loro.
 Questo paradosso è noto come \textbf{overfitting} (sovradattamento).
-
 L'overfitting si verifica quando un modello si adatta
 ``troppo bene'' ai dati del Training Set. Un modello molto
 complesso può imparare a memoria le peculiarità e persino
@@ -154,7 +196,7 @@ dei dati e fallirà nel generalizzare a nuovi record,
 poiché la frontiera di decisione che ha appreso è
 eccessivamente complessa e specifica per il campione di training.
 
-L'obiettivo non è quindi minimizzare l'errore sul TS (che
+L'obiettivo non è minimizzare l'errore sul TS (che
 porterebbe a un modello complesso e in overfitting), ma
 trovare un equilibrio: un modello (es. una retta o una
 curva semplice) che, pur commettendo qualche errore sul TS,
@@ -167,7 +209,6 @@ Per ``convalidare'' la proprietà di generalizzazione di un
 insieme di regole, si utilizza un metodo che prevede, oltre
 al TS, un altro insieme di record già etichettati, detto
 \textbf{Control Set (CS)} o \textbf{Test Set}.
-
 Il CS \textbf{non} viene utilizzato durante la fase di
 training (cioè per la sintesi delle regole). Viene usato
 solo dopo che le regole sono state definite.
@@ -193,7 +234,6 @@ Combinare più feature (es. lunghezza e luminosità dei pesci)
 sia sempre la migliore.
 L'inclusione di troppe feature, specialmente se irrilevanti,
 può amplificare il \"rumore\" e confondere il classificatore.
-
 Una buona pratica è scegliere feature che siano
 \textbf{invarianti} alle trasformazioni tipiche della
 situazione sperimentale (es. il peso di un pesce è
@@ -243,11 +283,13 @@ Per analizzare questa asimmetria si usa la
 che riporta quante istanze della classe ``reale'' (sulle colonne)
 sono state assegnate alla classe ``prevista'' (sulle righe).
 
-Un classificatore perfetto ha come matrice di confusione la
-matrice identica (tutti i valori sulla diagonale principale,
-zero altrove). Un buon classificatore avrà valori
-percentuali bassi al di fuori della diagonale principale.
+\begin{nota}{Matrice di confusione ideale}{}
+    Un classificatore perfetto ha come matrice di confusione la
+    matrice identica (tutti i valori sulla diagonale principale,
+    zero altrove). Un buon classificatore avrà valori
+    percentuali bassi al di fuori della diagonale principale.
 
+\end{nota}
 \subsection{Fasi di un sistema di classificazione}
 
 Il processo di classificazione automatica si articola in
