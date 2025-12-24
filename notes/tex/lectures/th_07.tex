@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Inizio del file th_07.tex
-% il file contiene le note relative al clustering:
+% il file contiene le note relative alla teoria dei giochi e al reinforcement learning:
 % - slide 14
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -8,15 +8,752 @@
 
 \section{Introduzione}
 
+La teoria dei giochi estende il concetto di problem solving
+introducendo la nozione di agenti multipli in competizione.
+A differenza del planning, dove la complessità risiede nella gestione di stati
+(congiunzioni di fatti) e operatori (legami tra fatti-condizioni e
+fatti-effetti, non tra stati), nel game playing viene introdotto nel dominio
+del problema la competizione tra agenti.
+
+\begin{nota}{Teoria della Decisione vs. Teoria dei Giochi}{}
+    Il lavoro seminale di Von Neumann e Morgenstern (1944),
+    \textit{"Theory of Games and Economic Behaviour"}, distingue due aree:
+    \begin{itemize}
+        \item \textbf{Teoria della decisione}: Analizzare il comportamento di
+        un agente le cui azioni hanno un effetto diretto, come nelle scommesse
+        o nei puzzle.
+        \item \textbf{Teoria dei giochi}: Analizza il comportamento di un
+        agente le cui azioni hanno effetti che dipendono dalle scelte di
+        altri agenti.
+    \end{itemize}
+\end{nota}
+
+\subsection{Classificazione dei giochi}
+
+I giochi possono essere classificati secondo diversi criteri.
+
+\subsubsection{Condizioni di scelta}
+\begin{itemize}
+    \item \textbf{Giochi a informazione perfetta}: Lo stato del gioco è
+    completamente noto a tutti gli agenti (es. Scacchi, Go).
+    \item \textbf{Giochi a informazione imperfetta}: Lo stato del gioco è solo
+    parzialmente noto agli agenti (es. Poker, MasterMind).
+\end{itemize}
+
+\subsubsection{Effetti della scelta}
+\begin{itemize}
+    \item \textbf{Giochi deterministici}: Lo stato successivo è determinato
+    unicamente dall'azione compiuta (es. Scacchi).
+    \item \textbf{Giochi stocastici}: Lo stato successivo dipende anche da
+    fattori casuali (es. Backgammon, Monopoly, che usano dadi).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_07/01.png}
+    \caption{Classificazione dei giochi secondo vari criteri.}
+\end{figure}
+
+\begin{nota}{Altre classificazioni}{}
+    Esistono ulteriori categorizzazioni:
+    \begin{itemize}
+        \item \textbf{Numero di giocatori}: Giochi a due o più giocatori (multiagente).
+        \item \textbf{Politica di turno}: Diacronica (turni definiti) o sincronica.
+        \item \textbf{Ambiente}: Discreto o continuo, statico o dinamico, episodico o sequenziale.
+        \item \textbf{Somma}: Giochi a somma zero, dove il guadagno di un giocatore corrisponde alla perdita di un altro.
+    \end{itemize}
+\end{nota}
+
+\begin{esempio}{L'agire umano}{}
+    L'essere umano agisce in un ambiente che può essere descritto come continuo, dinamico, sequenziale, con scelte sincroniche e informazione imperfetta.
+\end{esempio}
+
 \section{Algoritmi e applicazioni}
 
+Un gioco multi-agente può essere analizzato come un problema di ricerca.
+Tuttavia, sorgono una serie di complessità aggiuntive.
+
+\begin{esempio}{Scacchi come problema di ricerca}{}
+    
+    \begin{itemize}
+        \item $X$: l'insieme di tutti gli stati della scacchiera.
+        \item $X_0$: lo stato iniziale.
+        \item $SCS(x)$: le mosse legali in uno stato $x$.
+        \item $T(x)$: la condizione di scacco matto.
+        \item $g$: numerio di mosse.
+    \end{itemize}
+    I problemi riscontrabili sono:
+    \begin{itemize}
+        \item L'insieme di mosse $SCS(x)$ è controllato solo in parte da un
+        giocatore e le mosse sono spesso irreversibili.
+        \item La terminazione non è garantita solo da $T(x)$, è necessaria
+        una \textbf{funzione di utilità} che assegni un valore agli esiti
+        (es. vittoria = +1, patta = 0, sconfitta = -1).
+        \item $g$ non è determinante.
+        \item L'obbiettivo dell'agente è di definire una strategia che raggiunga
+        $T(x) = +1$.
+    \end{itemize}
+
+\end{esempio}
+
+Per riuscire ad inserire un gioco ad informazione perfetta in uno schema classico
+di ricerca è necessario considerare che:
+\begin{itemize}
+    \item Esiste un avversario che va simulato.
+    \item L'avversario cerca di minimizzare la nostra utilità.
+\end{itemize}
+L'albero di ricerca viene quindi si sviluppa su due giocatori:
+\begin{itemize}
+    \item Nodi \textbf{MAX}: rappresentano le mosse del giocatore.
+    \item Nodi \textbf{MIN}: rappresentano le mosse dell'avversario.
+\end{itemize}
+L'obbiettivo è raggiungere uno stato terminale di quest'albero con la
+massimizzazione dell'utilità.
+Se l'avversario inizia per primo lui sarà il nodo MAX, e noi saremo il nodo
+MIN; di conseguenza dovremo minimizzare la sua utilità.
+
+\subsection{Algoritmo Minimax}
+
+Per giochi a informazione perfetta è possibile trovare una strategia perfetta
+sfruttando una ricerca esaustiva dell'albero di gioco.
+L'algoritmo Minimax permette di trovare la strategia ottimale.
+L'idea sottostante è di modellare i due giocatori come un agente \textbf{MAX},
+che cerca di massimizzare la propria utilità, e un agente \textbf{MIN},
+che cerca di minimizzarla.
+
+\begin{definizione}{Funzionamento dell'algoritmo Minimax}{idea_alg_minmax}
+    \begin{enumerate}
+        \item Costruzione dell'albero di gioco fino ai nodi terminali.
+        \item Applicazione della funzione di utilità $U(x)$ ai nodi terminali.
+        \item Calcolo dell'utilità dei nodi superiori propagando i valori
+        verso la radice:
+        \begin{itemize}
+            \item Se il turno è di MAX, il valore del nodo è
+            $U(nodo_{sup}) = \max(U(\text{inf}))$.
+            \item Se il turno è di MIN, il valore del nodo è
+            $U(nodo_{sup}) = \min(U(\text{inf}))$.
+        \end{itemize}
+    \end{enumerate}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/th_07/02.png}
+        \caption{Albero di gioco per l'algoritmo Minimax.}
+    \end{figure}
+\end{definizione}
+
+\begin{definizione}{Pseudocodice Minimax}{pseudocodice_minimax}
+    I passi descritti nell'idea dell'algoritmo (\Cref{def:idea_alg_minmax})
+    possono essere formalizzati nel seguente pseudocodice:
+    \begin{algorithm}[H]
+        \caption{Pseudocodice algoritmo Minimax}
+        \begin{algorithmic}[1]
+            \Function{Minimax}{$nodo$, $agente$}
+                \State $figli[] = \text{SCS}(nodo, agente)$
+                
+                \ForAll{$figli$} \Comment{Itera sui nodi figli}
+                    \If{$\text{END\_test}(figlio) == \text{true}$}
+                        \State $figlio.utilit\grave{a} = \text{UTILITY\_test}(figlio)$
+                    \Else
+                        \State $figlio.utilit\grave{a} = \textsc{Minimax}(figlio, !agente)$
+                    \EndIf
+                    
+                    \Statex
+                    
+                    \If{$agente == \text{MAX} \land figlio.utilit\grave{a} > best$}
+                        \State $best = figlio.utilit\grave{a}$
+                    \EndIf
+                    
+                    \If{$agente == \text{MIN} \land figlio.utilit\grave{a} < best$}
+                        \State $best = figlio.utilit\grave{a}$
+                    \EndIf
+                \EndFor
+                
+                \State \Return $best$
+            \EndFunction
+            \end{algorithmic}
+        \end{algorithm}
+\end{definizione}
+
+\subsubsection{Proprietà e limiti}
+L'algoritmo Minimax presenta le proprietà seguenti:
+\begin{itemize}
+    \item \textbf{Completo} per grafi finiti.
+    \item \textbf{Ottimale} se l'avversario (MIN) gioca in modo ottimale.
+    \item \textbf{Complessità spaziale} $O(bm)$, dove $b$ è il fattore di
+    diramazione e $m$ la profondità massima dell'albero di ricerca.
+\end{itemize}
+
+\begin{nota}{Complessità spaziale} {}
+% TODO aggiungere link al capitolo sulla ricerca in profondità
+La complessità spaziale $O(bm)$ deriva dal fatto che viene effettuata una
+ricerca in profondità.
+\end{nota}
+
+
+\begin{nota}{Complessità temporale}{}
+    La complessità temporale $O(b^m)$ deriva dal fatto che in un albero di
+    ricerca con fattore di diramazione $b$ e profondità $m$, il numero totale
+    di nodi è approssimativamente $b^m$.
+\end{nota}
+
+\subsubsection{Algoritmo Minimax ed il gioco degli scacchi}
+Tuttavia, ha una complessità temporale $O(b^m)$ e spaziale $O(bm)$ (con $b$
+fattore di diramazione e $m$ profondità massima), rendendolo impraticabile
+per giochi complessi come gli scacchi, dove si stima $b \approx 35$ e
+$m \approx 100$.
+
+\subsubsection{Miglioramenti all'algoritmo Minimax}
+
+Per rendere l'algoritmo maggiormente utilizzabile, è necessario:
+
+\begin{itemize}
+    \item Limitare la ricerca ad una profondità massima $d \le m$.
+    \item Usare una funzione di valutazione euristica per stimare l'utilità
+    degli stati non terminali (i nodi terminali non sono più raggiunti).
+    \item Far risalire i valori calcolati fino alla radice per determinare
+    la mossa migliore.
+\end{itemize}
+
+\begin{nota}{Funzioni euristiche}{}
+Le funzioni di valutazione euristica stimano l'utilità di uno stato
+non terminale basandosi su caratteristiche rilevanti del gioco.
+Le funzioni euristiche possono essere categorizzate in:
+\begin{itemize}
+    \item \textbf{Funzioni lineari pesate}: combinano diverse caratteristiche
+    del gioco con pesi assegnati. Ad esempio $w_{1}f_{1} + w_{2}f_{2} + \cdots + w_{n}f_{n}$.
+    \item \textbf{Funzioni basate su pattern}: riconoscono configurazioni
+    specifiche della scacchiera che sono vantaggiose o svantaggiose.
+    \item \textbf{Funzioni non lineari}: ottenute tramite tecniche di
+    ``learning'', ma è necessario definire un target.
+\end{itemize}
+
+\end{nota}
+
+\begin{definizione}{Quiescenza}{quiescenza}
+    Relativamente alle euristiche è importante parlare di \textbf{quiescenza},
+    ovvero la proprietà di uno stato la cui euristica di utilità non varia molto
+    con l'applicazione operatori (legami tra fatti-condizioni e fatti-effetti,
+    non tra stati).
+\end{definizione}
+
+L'algoritmo mininmax con profondità limitata e taglio di stati quiescenti
+presenta:
+\begin{itemize}
+    \item \textbf{Taglio di profondità}: la ricerca viene limitata a una
+    profondità massima $d < m$. Per valutare i nodi foglia non terminali
+    si utilizza una \textbf{funzione di valutazione euristica}.
+    \item \textbf{Ricerca di quiescenza}: Per evitare il ``problema
+    dell'orizzonte'' (un taglio che nasconde una mossa disastrosa imminente),
+    per i nodi non ``quiescenti'' (stati instabili, es. durante una cattura)
+    la ricerca viene approfondita fino a raggiungere uno stato più stabile.
+\end{itemize}
+
+\begin{esempio}{Problemi nel gioco degli scacchi}{}
+    Un esempio di applicazione di minimax con profondità limitata e il taglio
+    agli stati quiescenti è il gioco degli scacchi.
+
+    Se si volesse arrivare a profondità 6 in una partita di scacchi (3 mosse
+    MAX e 3 mosse MIN), si avrebbe un numero di nodi pari a circa
+    $35^6 \approx 1.8 \cdot 10^{9}$.
+    Con un calcolatore abbastanza veloce in grado di eseguire $10^6$ mosse al
+    secondo ci vorrebbero circa 30 minuti.
+    In aggiunta la valutando fino a profondità 6 si otterrebbe un giocatore
+    mediocre.
+\end{esempio}
+
+\subsection{Potatura alfa-beta}
+
+La potatura (pruning) alfa-beta (McCarthy ’56) è un'ottimizzazione fondamentale
+dell'algoritmo Minimax. Permette di ``potare'' interi sottoalberi che non
+influenzeranno la decisione finale, senza alterare il risultato.
+
+\begin{nota}{Perché è possibile ottenre MAX senza osservare in modo esaustivo l'albero?}{}
+    È possibile ottenere la mossa MAX senza osservare in modo esaustivo l'albero
+    perché, durante la valutazione, si possono identificare situazioni in cui
+    un certo ramo non può influenzare la decisione finale.
+    \begin{enumerate}
+        \item Dato $U(n_0) = \alpha \to$ utilità minimax del nodo $n_0$ su cui
+        sceglie MAX.
+        \item Affinché la scelta conclusiva di MAX sia $\ne \alpha$ almeno 1
+        nodo $n$ (fratello di $n_0$) deve avere $U(n) > \alpha$.
+        \item Affinché $U(n) > \alpha$ per ogni nodo $n'$ successore di $n$
+        deve valere $h(n') > \alpha$.
+        \item Quindi, appena un successore di $n$ possiede $U(n') \le \alpha$
+        il sottoalbero restante può essere potato.
+    \end{enumerate}
+    
+\end{nota}
+
+L'algoritmo mantiene due variabili:
+\begin{itemize}
+    \item \textbf{Alfa ($\alpha$)}: Il miglior valore trovato finora
+    per MAX lungo il percorso dalla radice.
+    Inizializzato a $-\infty$.
+    \item \textbf{Beta ($\beta$)}: Il miglior valore trovato finora for
+    MIN lungo il percorso.
+    Inizializzato a $+\infty$.
+\end{itemize}
+
+La potatura avviene quando:
+\begin{itemize}
+    \item In un nodo MIN, si trova un valore $v \le \alpha$.
+    Il giocatore MAX ha già un'alternativa migliore, quindi eviterà
+    questo percorso.
+    \item In un nodo MAX, si trova un valore $v \ge \beta$.
+    Il giocatore MIN ha già un'alternativa migliore altrove, quindi
+    non sceglierà mai questo percorso.
+\end{itemize}
+
+\subsection{Pseudocodice potatura alfa-beta}
+\begin{algorithm}[H]
+    \caption{Pseudocodice potatura alfa-beta}
+    \label{alg:alpha-beta}
+    \begin{algorithmic}[1]
+        \Function{Max-Value}{$nodo, \alpha, \beta$}
+            \If{\text{CUTOFF-TEST}($nodo$)}
+                \State \Return \text{EVAL}($nodo$)
+            \EndIf
+            \State $v \leftarrow -\infty$
+            \ForAll{$figlio$ in \text{SCS}($nodo$)}
+                \State $v \leftarrow \max(v, \textsc{Min-Value}(figlio, \alpha, \beta))$
+                \If{$v \ge \beta$}
+                    \State \Return $v$
+                \EndIf
+                \State $\alpha \leftarrow \max(v, \alpha)$
+            \EndFor
+            \State \Return $v$
+        \EndFunction
+        
+        \Statex
+
+        \Function{Min-Value}{$nodo, \alpha, \beta$}
+            \If{\text{CUTOFF-TEST}($nodo$)}
+                \State \Return \text{EVAL}($nodo$)
+            \EndIf
+            \State $v \leftarrow +\infty$
+            \ForAll{$figlio$ in \text{SCS}($nodo$)}
+                \State $v \leftarrow \min(v, \textsc{Max-Value}(figlio, \alpha, \beta))$
+                \If{$v \le \alpha$}
+                    \State \Return $v$
+                \EndIf
+                \State $\beta \leftarrow \min(v, \beta)$
+            \EndFor
+            \State \Return $v$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+Nel caso generale se $n_0$ è migliore di $n'$ allora $n'$ non verrà mai
+raggiunto durante il gioco e quindi tutto il sottoramo corrispondente può essere
+potato.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/th_07/03.png}
+    \caption{Esempio di potatura alfa-beta.}
+\end{figure}
+
+\begin{nota}{Efficacia della potatura}{}
+    L'efficacia dipende dall'ordine di valutazione dei nodi. Con un
+    ordinamento ottimale, la complessità temporale si riduce a $O(b^{m/2})$,
+    raddoppiando di fatto la profondità di ricerca esplorabile.
+    Nel caso medio è circa $O(b^{3m/4})$.
+    In caso di ordinamento pessimo, la complessità rimane $O(b^m)$.
+\end{nota}
+
+\subsection{Altre problematiche da affrontare}
+
+Oltre alle problematiche relative alla profondità di ricerca e alla potatura
+è possibile trovare:
+\begin{itemize}
+    \item Problema dell’orizzonte
+    \item Eccessiva ﬁducia nell’euristica
+    \item Eventi stocastici
+    \item Giochi multiplayer
+    \item Branching Factor e potenza di calcolo
+\end{itemize}
+
+\subsection{Problema dell'orizzonte}
+Un un lungo periodo di quiescenza (\Cref{def:quiescenza}) può precedere un
+rapido e inevitabile peggioramento dell'utilità.
+Se il taglio in profondità è avvenuta in una specifica ``zona'' dell'albero,
+la valutazione potrebbe non riflettere questo imminente cambiamento e valutare
+lo stato come favorevole, portando a uno stato disastroso.
+
+\subsection{Eccessiva fiducia nell'euristica}
+Una valutazione molto irregolare tra nodi ``fratelli'' è rischiosa, in
+particolare se viene utilizzato il taglio alpha-beta.
+Infatti sarebbe necessario effettuare un'ulteriore ricerca nel sottoramo per
+poter accertare la bontà della valutazione
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/th_07/04.png}
+    \caption{Classificazione dei giochi secondo vari criteri.}
+\end{figure}
+
+
+\subsection{Eventi stocastici e ExpectiMAX}
+Per giochi con elementi stocastici (ovvero quando non si è in grado di sapere
+quale sarà l'esito di una mossa), è possibile applicare la ricerca ExpectiMAX.
+Invece dei nodi MIN, si introducono dei \textbf{nodi caso}
+(chance nodes), che calcolano il valore atteso delle possibili uscite (figli).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/th_07/05.png}
+    \caption{Esempio di albero ExpectiMAX.}
+\end{figure}
+
+\begin{definizione}{Valore atteso}{expected_value}
+    Il \textbf{valore atteso} di una funzione è il suo output medio ponderato
+    da una data distribuzione di probabilità sugli input.
+\end{definizione}
+
+\begin{definizione}{Utilità}{utilita}
+    Le \textbf{utilità} sono funzioni dai risultati (stati del mondo) a numeri
+    reali che descrivono le preferenze di un agente.
+    Le utilità potrebbero essere:
+    \begin{itemize}
+        \item $+1/-1$ per vittoria/sconfitta.
+        \item GLi obbiettivi di un agente.
+        \item Qualsiasi insieme di preferenze tra i risultati.
+    \end{itemize}
+\end{definizione}
+
+\begin{definizione}{Principio di massima utilità attesa}{expectimax}
+    Un agente dovrebbe scegliere l'azione che massimizza la sua utilità attesa,
+    data la conoscenza corrente.
+\end{definizione}
+
+\subsection{Ricerca ExpectiMAX}
+
+Nella ricerca ExpectiMAX, si presenta un modello probabilistico di come la
+volontà dell'avversario, o dell'ambiente, può comportarsi in un qualsiasi
+stato. In questa situazione:
+\begin{itemize}
+    \item Un modello che potrebbe avere una distribuzione di probabilità (es.
+    uniforme) sulle mosse legali.
+    \item Il modello potrebbe essere più soffisticato e richidere una grande
+    quantità di calcoli.
+    \item Esiste un nodo per risultato al di fuori dal controllo dell'agente.
+    \item Il modello potrebbe portare a probabili azioni contraddittorie.
+\end{itemize}
+
+\begin{definizione}{Pseudocodice ExpectiMAX}{pseudocodice_expectimax}
+    \begin{algorithm}[H]
+        \caption{Pseudocodice algoritmo ExpectiMAX}
+        \label{alg:expectimax}
+        \begin{algorithmic}[1]
+            \Function{Value}{$s$}
+                \If{$s$ \text{ is a max node}}
+                    \State \Return \textsc{MaxValue}($s$)
+                \EndIf
+                \If{$s$ \text{ is an exp node}}
+                    \State \Return \textsc{ExpValue}($s$)
+                \EndIf
+                \If{$s$ \text{ is a terminal node}}
+                    \State \Return \text{evaluation}($s$)
+                \EndIf
+            \EndFunction
+            
+            \Statex
+
+            \Function{MaxValue}{$s$}
+                \State $values = [\textsc{Value}(s') \text{ for } s' \text{ in successors}(s)]$
+                \State \Return $\max(values)$
+            \EndFunction
+            
+            \Statex
+
+            \Function{ExpValue}{$s$}
+                \State $values = [\textsc{Value}(s') \text{ for } s' \text{ in successors}(s)]$
+                \State $weights = [\text{probability}(s, s') \text{ for } s' \text{ in successors}(s)]$
+                \State \Return \text{expectation}(values, weights)
+            \EndFunction
+        \end{algorithmic}
+    \end{algorithm}
+\end{definizione}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/th_07/06.png}
+    \caption{Esempio di albero ExpectiMAX.}
+\end{figure}
+
+\subsubsection{Giochi multiplayer e algoritmo $MAX^N$}
+Per giochi con più di due giocatori, dove non è presente accordo tra questi,
+è possibile generalizzare Minimax con l'algoritmo \textbf{$MAX^N$}.
+Per funzionare è necessario introdurre delle assunzioni:
+\begin{itemize}
+    \item I giocatori muovono a turni
+    \item Ogni giocatore mira a massimizzare il proprio utile
+    \item Ogni giocatore `e indiﬀerente all’utile degli avversari
+\end{itemize}
+
+La funzione di valutazione ora restituisce un vettore di utilità
+$U(s) = \langle u_1, u_2, \ldots, u_n \rangle$, dove $u_i = U(p_i, s)$ è
+l'utilità per il giocatore $p_i$ allo stato del gioco $s$.
+L'algoritmo in quesione è di tipo depth-first search come Minimax e fa
+risalire la $n-$upla che massimizza $U(p_n)$ quando è il turno del giocatore
+$p_n$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/th_07/07.png}
+    \caption{Esempio di albero $MAX^N$ per tre giocatori.}
+\end{figure}
+
+\subsection{Algoritmo Paranoid}
+Un'alternativa più semplice a $MAX^N$ è l'algoritmo \textbf{Paranoid},
+che assume che tutti gli altri giocatori formino una coalizione contro MAX,
+minimizzando la sua utilità.
+Questo riduce il problema a un gioco a due giocatori,
+permettendo di usare la potatura alfa-beta, ma non garantisce l'ottimalità.
+
+\begin{nota}{La vera sfida}{}
+    La vera sfida nei giochi multiplayer non è tanto la ricerca della mossa
+    ottimale, ma la modellazione degli avversari e delle loro strategie.
+    Infatti un uomo non utilizza semplicemente la ricerca come metodo
+    principale ma:
+    \begin{itemize}
+        \item Prima parte dai GOAL (non ben definiti).
+        \item A ritroso costruisce SOTTOGOAL
+        \item pianiﬁca: azioni 7 $ \rightarrow $ sottogoal 7 $ \rightarrow $ goal
+        \item Usa la ricerca per raggiungere obiettivi locali
+        \item Ha capacità ``istintive'' di escludere le scelte inutili: riduce
+            enormemente il branching factor
+    \end{itemize}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/th_07/08.png}
+        \caption{Esempio di giocatore di scacchi artificiale.}
+    \end{figure}
+\end{nota}
 \section{Apprendimento per rinforzo}
+
 \subsection{Introduzione}
+
+L'apprendimento per rinforzo (reinforcement learning) è una tecnica di
+apprendimento automatico che mira a creare \textbf{agenti autonomi} capaci
+di scegliere azioni in un \textbf{ambiente} per raggiungere un determinato
+\textbf{obiettivo}.
+L'ambiente fornisce un feedback sotto forma di \textbf{ricompense}, e
+l'agente cerca di massimizzare una nozione di \textbf{premio cumulativo}
+
+L'agente non viene istruito su cosa fare, ma impara attraverso l'interazione,
+ricevendo ricompense (positive o negative) in base alle sue azioni.
+
+Esistono due paradigmi principali:
+\begin{itemize}
+    \item \textbf{Model-free}: L'agente impara una funzione di valore
+    o una politica direttamente dall'esperienza, senza costruire un
+    modello esplicito dell'ambiente.
+    \item \textbf{Model-based}: L'agente impara un modello dell'ambiente
+    (funzione di transizione e di ricompensa) e lo usa per pianificare le
+    azioni.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/th_07/09.png}
+    \caption{Relazione tra learning, planning e acting.}
+\end{figure}
 
 \subsection{Model learning}
 
+Nel model-based, il modello è tipicamente un Processo Decisionale di Markov
+(MDP), definito dalla tupla $\langle S, A, R, T, \gamma \rangle$
+parametrizzato secondo $\nu$.
+In questa situazione è necessario assumere che è presente un indipendenza
+condizionale tra le transazioni e le ricompense:
+$P[s_{t+1},r_{t+1}|s_t,a_t] = P[s_{t+1}|s_t,a_t]P[r_{t+1}|s_t,a_t]$
+
+L'apprendimento del modello è di tipo supervisionato e consiste
+nell'apprendere:
+\begin{itemize}
+    \item La \textbf{funzione di ricompensa} $R(s, a)$ tramite
+    regressione.
+    \item La \textbf{distribuzione di transizione} $P(s'|s, a)$ come
+    problema di stima della densità.
+\end{itemize}
+
+\begin{nota}{Scelta della famiglia di modelli}{}
+Per l'apprendimento del modello, è necessario scegliere una famiglia
+appropriata di modelli parametrizzati. Tra le opzioni disponibili vi sono:
+modelli di ricerca tabellare, aspettativa lineare, gaussiana lineare,
+processo gaussiano, rete di credenze profonde, ecc.
+Una volta selezionata la famiglia di modelli, si sceglie una funzione di
+perdita (loss) appropriata, come l'errore quadratico medio o la divergenza KL,
+per ottimizzare i parametri del modello in modo da minimizzare tale perdita.
+\end{nota}
+
 \subsection{Ricerca basata su simulazione}
 
-\subsubsection{Monte-Carlo tree search}
+Dato un modello (esatto o appreso), i metodi di ricerca basata su simulazione
+identificano l'\textbf{azione migliore} attraverso simulazioni in avanti, costruendo
+un \textbf{albero di ricerca} a partire dallo stato corrente.
+Questo approccio è efficiente perché risolve un MDP subottimale solo per
+lo stato attuale.
+
+Una volta acquisita l'esperienza simulata, è possibile utilizzare un
+approccio model-free, come i metodi Monte-Carlo (MC).
+Nello specifico, dato un modello $M$ e una politica di simulazione $\pi$,
+in un algoritmo di ricerca MC, per ogni azione $a \in A$ vengono simulati
+$K$ episodi seguendo la politica $\pi$.
+Il valore $Q(s_t, a)$ viene calcolato come la media delle ricompense ottenute
+da tali simulazioni. Infine, viene scelta l'azione che massimizza $Q(s_t, a)$.
+
+\subsubsection{Monte-Carlo Tree Search (MCTS)}
+
+MCTS è una famiglia di algoritmi di ricerca basata su simulazione,
+particolarmente efficace in giochi con spazi di ricerca molto grandi.
+Non richiede conoscenza del dominio, ma solo la capacità di campionare gli
+esiti delle azioni (black-box).
+
+Questa famiglia di algoritmi si basa su due principi fondamentali:
+\begin{enumerate}
+    \item Il vero valore di uno stato può essere stimato utilizzando la media
+    dei valori ottenuti da simulazioni casuali.
+    \item Tali valori possono essere utilizzati per aggiustare iterativamente
+    le politiche di scelta secondo una strategia best-first, permettendo di
+    concentrarsi sulle regioni dello spazio di ricerca con rendimento e valore
+    migliori.
+\end{enumerate}
+
+In ogni nodo dell'albero vengono memorizzate le seguenti statistiche:
+\begin{itemize}
+    \item Conteggio totale delle visite $N(s)$.
+    \item Conteggio specifico per ogni coppia stato-azione $N(s, a)$.
+    \item Valori stimati tramite Monte-Carlo $Q(s, a)$.
+\end{itemize}
+
+L'albero di ricerca parziale è costruito \textbf{progressivamente} utilizzando
+il nodo corrente come radice di un nuovo sottalbero.
+Ogni iterazione dell'algoritmo MCTS consiste in quattro fasi principali:
+\begin{enumerate}
+    \item \textbf{Selezione}: A partire dalla radice, si seleziona
+    ricorsivamente un nodo foglia promettente usando una tree policy.
+    \item \textbf{Espansione}: Se il nodo foglia non è terminale, si espande
+    l'albero aggiungendo uno o più nodi figli.
+    \item \textbf{Simulazione}: Da un nuovo nodo, si esegue una simulazione
+    cercando di produrre una stima degli esiti (outcomes).
+    \item \textbf{Retropropagazione}: L'esito della simulazione viene usato
+    per aggiornare le statistiche (es. numero di vittorie e visite) di tutti
+    i nodi attraversati nella fase di selezione.
+\end{enumerate}
+
+Le varianti dell'algoritmo modificano due politiche principali per migliorare
+l'utilizzo della memoria, per ottenere una potatura migliore o per avere
+delle statistiche più complesse.
+Le politiche sono:
+\begin{itemize}
+    \item \textbf{Tree policy}: per scegliere le azioni da poter applicare in
+    ogni nodo e quindi le loro statistiche
+    \item \textbf{Roll out policy}: per decidere come eseguire le simulazioni
+    dei nodi foglia.
+\end{itemize}
+
+\begin{figure}[H]
+\begin{minipage}{0.48\textwidth}
+\begin{algorithm}[H]
+    \caption{General MCTS algorithm}
+    \label{alg:mcts}
+    \begin{algorithmic}[1]
+        \Function{MCTS}{$s_0$}
+            \State Create root node $v_0$ corresponding to $s_0$
+            \While{within computational budget}
+                \State $v_k \leftarrow \text{TreePolicy}(v_0)$
+                \State $\Delta \leftarrow \text{Simulation}(v_k)$
+                \State $\text{Backprop}(v_k, \Delta)$
+            \EndWhile
+            \State \Return $\arg\max_a Q(s_0, a)$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+\begin{algorithm}[H]
+    \caption{Greedy Tree policy}
+    \label{alg:greedy-tree-policy}
+    \begin{algorithmic}[1]
+        \Function{TreePolicy}{$v$}
+            \State $v_{next} \leftarrow v$
+            \If{$|\text{Children}(v_{next})| \ne 0$}
+                \State $a \leftarrow \arg\max_{a \in A} Q(v, a)$
+                \State $v_{next} \leftarrow \text{nextState}(v, a)$
+                \State $v_{next} \leftarrow \text{TreePolicy}(v_{next})$
+            \EndIf
+            \State \Return $v_{next}$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_07/10.png}
+    \caption{Esempio di simulazione MCTS.}
+\end{figure}
+
+\begin{nota}{Upper Confidence Bound (UCB)}{ucb}
+    La politica greedy può portare a delle scelte molto \textbf{subottimali} che
+    portano l'algoritmo a evitare \textbf{azioni} con un solo o pochi non
+    significativi \textbf{risultati negativi}.
+    Questo fenomeno è dovuto essenzialmente alla \textbf{incertezza} circa il
+    valore/probabilità reale di tali azioni negative.
+
+    Per risolvere tale problema si può applicare il principio di
+    \textbf{ottimalità sotto incertezza} al MCTS usando UCB (limite superiore
+    di confidenza).
+    
+    Invece di selezionare l'azione in modo greedy, si seleziona l'azione che
+    massimizza il \textbf{limite superiore di confidenza} il cui valore è dato da:
+    \[ Q(s,a) + \sqrt{\frac{2\ln{N(s)}}{N(s,a)}} \]
+    dove $Q(s,a)$ è il valore stimato dell'azione, $N(s)$ è il numero di visite
+    al nodo padre, e $N(s,a)$ è il numero di volte che l'azione è stata scelta.
+
+    \begin{algorithm}[H]
+        \caption{Upper Confidence Tree policy}
+        \label{alg:ucb-tree-policy}
+        \begin{algorithmic}[1]
+            \Function{TreePolicy}{$v$}
+                \State $v_{next} \leftarrow v$
+                \If{$|\text{Children}(v_{next})| \ne 0$}
+                    \State $a \leftarrow \arg\max_{a \in A} \left( Q(v, a) + \sqrt{\frac{2\ln{N(v)}}{N(v,a)}} \right)$
+                    \State $v_{next} \leftarrow \text{nextState}(v, a)$
+                    \State $v_{next} \leftarrow \text{TreePolicy}(v_{next})$
+                \EndIf
+                \State \Return $v_{next}$
+            \EndFunction
+        \end{algorithmic}
+    \end{algorithm}
+\end{nota}
 
 \subsubsection{Go e AlphaGo}
+
+Il Go è un gioco da tavolo a informazione perfetta, deterministico, con un
+fattore di diramazione enorme ($b > 200$), che lo ha reso per decenni una
+grande sfida per l'IA.
+
+\textbf{AlphaGo}, sviluppato da DeepMind, ha sconfitto i migliori giocatori
+umani combinando MCTS con reti neurali profonde:
+\begin{itemize}
+    \item Una \textbf{Policy Network} per guidare la selezione delle mosse,
+    riducendo l'ampiezza della ricerca.
+    \item Una \textbf{Value Network} per valutare le posizioni, riducendo
+    la profondità della ricerca.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_07/11.png}
+    \caption{Esempio di simulazione MCTS.}
+\end{figure}
+
+\begin{nota}{AlphaGO Zero}{}
+Le versioni successive, come \textbf{AlphaGo Zero}, hanno ulteriormente
+migliorato l'approccio imparando esclusivamente tramite auto-gioco
+(self-play), senza dati umani.
+\end{nota}
