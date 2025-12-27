@@ -6,5 +6,563 @@
 
 \chapter{Grafi}
 
+\section{Introduzione}
+La teoria dei grafi ha come data di nascita il 1736, anno in cui
+Leonhard Euler risolse il problema dei \textit{Ponti di Königsberg}.
+La città di Königsberg (oggi Kaliningrad) era attraversata dal fiume
+Pregel, che formava due isole collegate tra loro e con le sponde del
+fiume tramite sette ponti. La domanda era se fosse possibile
+passeggiare per la città attraversando ciascun ponte una sola volta.
+Euler dimostrò che non era possibile, ponendo le basi per la teoria
+dei grafi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/01.png}
+    \caption{I ponti di Königsberg.}
+\end{figure}
+
 \section{Teoria dei grafi}
-\section{Algoritmi di ricerca sui grafi}
+
+\subsection{Introduzione}
+\begin{definizione}{Grafo}{graph}
+    Un \textbf{grafo} $G = (V, E)$ è un insieme di \textbf{vertici o nodi} $V$
+    e un insieme di \textbf{archi o spigoli} $E$ che collegano coppie di
+    vertici.
+    Per semplcitià, si considerano grafi che presentano numero di nodi e di
+    archi finiti, quindi $|V| = n$ e $|E| = m$.
+\end{definizione}
+
+\begin{esempio}{Esempio di grafo}{}
+    Consideriamo un grafo $G$ con $V(G) = \{v_1, v_2, \ldots, v_5\}$ e 
+    $E(G) = \{e_1, e_2, \ldots, e_6\}$.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/th_05/02.png}
+        \caption{Esempio di grafo.}
+    \end{figure}
+    
+    Definiamo i seguenti concetti:
+    \begin{itemize}
+        \item Un lato $e_k = (v_i, v_j)$ è detto \textbf{incidente} ai vertici
+        $v_i$ e $v_j$.
+        \item Il \textbf{grado} di un vertice $v \in V$ è il numero $d(v)$
+        di lati incidenti a tale vertice.
+        \item Un \textbf{self-loop} (cappio) conta 2 nel calcolo del grado
+        di un vertice.
+        \item Un \textbf{vertice isolato} è un vertice con grado 0.
+    \end{itemize}
+\end{esempio}
+
+\begin{teorema}{Lemma delle strette di mano}{handshake_lemma}
+    La somma dei gradi di un grafo (\Cref{def:graph}) vale
+    $\sum_{v \in V} d(v) = 2|E| = 2m$.
+\end{teorema}
+
+\begin{corollario}{Vertici di grado dispari}{cor:odd_degree_vertices}
+    In ogni grafo, il numero di vertici di grado dispari è pari.
+\end{corollario}
+
+\begin{dimostrazione}{Vertici di grado dispari}{}
+    Poiché la somma dei gradi è $2m$ (un numero pari), la somma dei gradi
+    dispari deve essere anch'essa pari. Questo è possibile solo se il numero
+    di vertici con grado dispari è pari.
+\end{dimostrazione}
+
+\begin{nota}{Applicazione pratica}{}
+    Questo corollario è degno di nota perché rappresenta un vincolo strutturale
+    a cui deve sottostare ogni grafo. Ad esempio, non è possibile costruire
+    un grafo di nove persone in modo tale che ognuna di loro conosca
+    esattamente altre cinque persone del gruppo (poiché 9 è dispari e 5 è dispari).
+\end{nota}
+
+\subsection{Tipi di grafi}
+
+Esistono diversi tipologie di grafi, tra queste è possibile trovare:
+\begin{itemize}
+    \item Grafi semplici (\Cref{def:simple_graph}).
+    \item Grafi diretti (\Cref{def:directed_graph}).
+    \item Grafi pesati (\Cref{def:weighted_graph}).
+    \item Multigrafi (\Cref{def:multigraph}).
+    \item Ipergrafi (\Cref{def:hypergraph}).
+\end{itemize}
+
+\begin{definizione}{Grafo semplice}{simple_graph}
+    Un \textbf{grafo semplice} è un grafo che non contiene self-loop né
+    archi multipli tra due vertici.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/th_05/02.png}
+        \caption{Esempio di grafo semplice.}
+    \end{figure}
+    
+\end{definizione}
+
+\begin{definizione}{Grafo diretto}{directed_graph}
+    Un \textbf{grafo diretto} (o digrafo) è un grafo in cui gli archi
+    hanno una direzione associata, rappresentata da una freccia.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/th_05/03.png}
+        \caption{Esempio di grafo diretto.}
+    \end{figure}
+    In un grafo diretto un arco $e = (v_s, v_t)$ ha un vertice di
+    \textbf{partenza (o sorgente)} $v_s$ e un vertice di \textbf{arrivo
+    (o destinazione)} $v_t$.
+
+    Ogni nodo ha un \textbf{grado entrante} $d_{in}(v)$, che è il numero
+    di archi che arrivano al nodo, e un \textbf{grado uscente}
+    $d_{out}(v)$, che è il numero di archi che partono dal nodo.
+
+    Un grafo è \textbf{bilanciato} se per ogni vertice $v$ vale
+    $d_{in}(v) = d_{out}(v)$.
+\end{definizione}
+
+\begin{definizione}{Grafo pesato}{weighted_graph}
+    Un \textbf{grafo pesato} è un grafo in cui ogni arco ha un peso
+    associato, rappresentando costi, distanze o capacità.
+\end{definizione}
+
+\begin{definizione}{Multigrafo}{multigraph}
+    Un \textbf{multigrafo} è un grafo che può contenere archi multipli
+    tra due vertici.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/th_05/04.png}
+        \caption{Esempio di multigrafo.}
+    \end{figure}
+\end{definizione}
+
+\begin{definizione}{Ipergrafo}{hypergraph}
+    Un \textbf{ipergrafo} è una generalizzazione di un grafo in cui
+    un arco può collegare più di due vertici.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/th_05/05.png}
+        \caption{Esempio di ipergrafo.}
+    \end{figure}
+\end{definizione}
+
+\subsection{Distanze e diametro}
+
+Uno dei concetti fondamentali nella ricerca sui grafi è quello di distanza.
+
+\begin{definizione}{Distanza e adiacenza}{distanza}
+    La \textbf{distanza} tra due vertici $u$ e $v$, denotata spesso come
+    $d(u,v)$, è la lunghezza del \textbf{cammino minimo} (numero minimo di
+    archi) necessario per andare da $u$ a $v$.
+    \begin{itemize}
+        \item Due vertici si dicono \textbf{adiacenti} se la loro distanza è
+        1 (sono connessi direttamente da un lato).
+        \item Se non esiste un cammino tra $u$ e $v$, la distanza è infinita.
+    \end{itemize}
+\end{definizione}
+
+\begin{definizione}{Diametro}{diametro}
+    Il \textbf{diametro} di un grafo è la massima distanza possibile tra una
+    qualsiasi coppia di nodi del grafo. Ed è definita come
+    $D_{max} = \max_{u, v \in V} d(u, v)$
+\end{definizione}
+
+\begin{esempio}{Diametro e Small World}{}
+    \begin{itemize}
+        \item Il grafo dei ponti di Königsberg ha diametro 2.
+        \item Un grafo completo ($K_n$) ha sempre diametro 1.
+    \end{itemize}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.3\textwidth]{images/th_05/06.png}
+        \caption{Grafo di Königsberg.}
+    \end{figure}
+\end{esempio}
+
+\begin{nota}{Diametro nelle reti sociali}{}
+    Nelle reti sociali reali, il diametro tende ad essere sorprendentemente
+    piccolo, un fenomeno noto come \textbf{small world} o
+    ``Sei gradi di separazione'' (esperimento di Milgram), che indica che due
+    nodi qualunque sono connessi da una catena corta di conoscenze.
+\end{nota}
+
+\subsection{Circuiti Euleriani e Hamiltoniani}
+
+Gli algoritmi di esplorazione si occupano spesso di trovare percorsi che
+soddisfano determinate proprietà globali.
+
+\begin{definizione}{Circuito in un grafo}{circuit}
+    Un \textbf{circuito (o anello)} in un grafo è un cammino che inizia e
+    finisce dallo stesso vertice.
+\end{definizione}
+
+\begin{definizione}{Circuito euleriano}{eulerian_circuit}
+    Un \textbf{circuito euleriano} è un circuito (\Cref{def:circuit}) che
+    che opassa per ogni arco del grafo esattamente una volta.
+\end{definizione}
+
+\begin{teorema}{Teorema di Eulero}{euler_theorem}
+    Un grafo connesso possiede un circuito euleriano
+    (\Cref{def:eulerian_circuit}) se e solo se ogni vertice ha
+    \textbf{grado pari}.
+\end{teorema}
+
+\begin{teorema}{Necessità}{}
+    Se esiste un circuito euleriano (\Cref{def:eulerian_circuit}) , allora
+    questo visita tutti i nodi. Ogni volta che viene raggiunto un nodo $v$,
+    questo deve essere lasciato con un altro arco, quindi il suo grado è pari.
+\end{teorema}
+
+\begin{dimostrazione}{Sufficienza}{}
+    La dimostrazione costruttiva procede come segue:
+    \begin{enumerate}
+        \item Poiché tutti i vertici hanno grado pari, in $G$ deve esistere
+        almeno un ciclo $\varphi$.
+        \item Consideriamo il sottografo $H$ ottenuto rimuovendo da $G$ tutti
+        gli archi del ciclo $\varphi$.
+        \item I nodi in $H$ che non sono isolati mantengono ancora grado pari
+        (poiché abbiamo rimosso un ciclo completo).
+        \item Da ogni componente connessa di $H$ possiamo ottenere un ciclo
+        $\varphi_i$.
+        \item Continuiamo questo processo finché non riduciamo tutto il grafo
+        a nodi isolati.
+        \item Per costruire il circuito euleriano finale, partiamo dal ciclo
+        iniziale $\varphi$. Ogni volta che incontriamo un nodo che appartiene
+        anche a un altro ciclo $\varphi_i$, inseriamo l'intero ciclo $\varphi_i$
+        nel nostro cammino.
+        \item Alla fine di questo processo, otteniamo un circuito euleriano
+        completo.
+    \end{enumerate}
+\end{dimostrazione}
+
+
+\section{Modelli di Reti}
+
+Per studiare le proprietà dei grafi reali, si utilizzano diversi modelli
+generativi
+
+Prima di procedere è necessario introdurre il concetto di
+\textbf{distribuzione dei gradi}.
+
+\begin{definizione}{Distribuzione dei gradi}{degree_distribution}
+    La \textbf{distribuzione dei gradi} $P(k)$ di un grafo è la
+    probabilità che un nodo scelto casualmente abbia grado $k$.
+    Viene calcolata come $P(k) = \frac{N_k}{N}$, dove $N_k$ è il numero di
+    nodi con grado $k$ e $N$ è il numero totale di nodi nel grafo.
+\end{definizione}
+
+\begin{nota}{Distribuzione dei gradi e frequenza}{}
+La distribuzione dei gradi (\Cref{def:degree_distribution}), come detto,
+rappresenta la probabilità che scegliendo a caso un nodo dal grafo questo
+abbia grado $k$. Questo equivale alla frequenza relativa dei nodi con grado
+$k$ nel grafo.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/th_05/07.png}
+    \caption{Esempio di frequenza e distribuzione dei gradi.}
+\end{figure}
+\end{nota}
+
+\subsection{Tipi di reti}
+
+Tra le tipologie di reti più comuni è possibile trovare:
+\begin{itemize}
+    \item Reti casuali (\Cref{def:random_network}).
+    \item Reti small world (\Cref{def:small_world_network}).
+    \item Reti scale-free (\Cref{def:scale_free_network})
+\end{itemize}
+
+\begin{definizione}{Rete casuale}{random_network}
+    Una \textbf{rete casuale} è un grafo generato secondo un processo
+    stocastico, dove gli archi sono creati in modo casuale tra i nodi.
+    Le reti casuali sono spesso utilizzate come modelli null per confrontare
+    le proprietà delle reti reali.
+\end{definizione}
+
+
+\begin{definizione}{Rete small world}{small_world_network}
+    Una \textbf{rete small world} è un grafo in cui la maggior parte dei nodi
+    non sono vicini tra loro, ma la maggior parte dei nodi può essere raggiunta
+    da qualsiasi altro nodo tramite un piccolo numero di passaggi.
+\end{definizione}
+
+\begin{definizione}{Rete scale-free}{scale_free_network}
+    Una \textbf{rete scale-free} (o \textbf{rete a invarianza di scala}) è un
+    grafo in cui la distribuzione dei gradi (\Cref{def:degree_distribution})
+    segue una \textbf{legge di potenza}. Questo significa che pochi nodi
+    possiedono moltissime connessioni (hub), mentre la maggior parte dei nodi
+    ne possiede poche.
+    
+    \textbf{Invarianza di scala:} Quando si analizza la relazione tra il numero
+    di nodi e il numero delle loro connessioni, il grafico risultante mostra
+    un andamento esponenziale negativo, che rimane invariante per cambiamenti
+    di scala.
+    
+    In termini matematici, confrontando due tipologie di nodi (ad esempio,
+    nodi con 10 connessioni e nodi con 15 connessioni), la proporzione
+    $\frac{N_a}{N_b}$ tra i due gruppi segue la relazione:
+    \[
+    \frac{N_a}{N_b} = e^{-\alpha(N_b - N_a)}
+    \]
+    dove $N_a$ e $N_b$ rappresentano rispettivamente il numero di nodi con
+    grado $k_a$ e $k_b$, mentre $\alpha$ è un parametro caratteristico
+    della rete considerata. Questa relazione prende il nome di
+    \textbf{legge di potenza}, di cui $\alpha$ è il parametro.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/th_05/08.png}
+        \caption{
+            Legge di potenza e distribuzione dei gradi in una rete scale-free.
+        }
+    \end{figure}
+
+\end{definizione}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/09.png}
+    \caption{
+        Esempio di reti random, small-world e scale-free con i rispettivi
+        gradi di distribuzione.
+    }
+\end{figure}
+
+\subsection{Modelli di reti}
+Oltre alle tipologie di reti descritte sopra, esistono diversi modelli generativi
+per studiare le proprietà matematiche dei grafi.
+Tra questi è possbile trovare:
+\begin{itemize}
+    \item Modello Barabási-Albert (\Cref{def:barabasi_albert}).
+    \item Modello Erdős-Rényi $G(n, M)$ (\Cref{def:erdos_renyi_gnm}).
+    \item Modello Gilbert $G(n, p)$ (\Cref{def:gilbert_gnp}).
+\end{itemize}
+
+\begin{definizione}{Modello Barabási-Albert}{barabasi_albert}
+    Il modello di \textbf{Barabási-Albert} genera reti scale-free
+    (\Cref{def:scale_free_network}) utilizzando un meccanismo di
+    \textbf{attacco preferenziale}.
+    In questo modello la rete inizia con un piccolo nucleo di $m_0$ nodi
+    connessi. I nuovi nodi vengono aggiunti uno alla volta; ciascun nuovo nodo
+    porta con sé $m \le m_0$ archi che si collegano ai nodi già esistenti.
+    La connessione non è casuale uniforme, ma avviene con una probabilità
+    proporzionale al grado attuale dei nodi (``i ricchi diventano più ricchi'').
+    
+    Formalmente, la probabilità $p_i$ che il nuovo nodo si connetta al nodo $i$ è:
+    \[
+    p_i = \frac{k_i}{\sum_{j} k_j}
+    \]
+    dove $k_i$ è il grado del nodo $i$ e la sommatoria al denominatore rappresenta la somma dei gradi di tutti i nodi preesistenti nella rete.
+    
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/10.png}
+    \caption{
+        Esempio di evoluzione di una rete Barabási-Albert al variare del parametro $m$.
+    }
+    \end{figure}
+\end{definizione}
+
+\begin{nota}{Hub e fragilità}{}
+    Nelle reti generate tramite il modello Barabási-Albert, emergono
+    naturalmente dei nodi detti \textbf{hub} (ad altissimo grado).
+    Questo rende la rete molto robusta a guasti casuali (perché è probabile
+    che si rompa un nodo periferico poco importante), ma estremamente fragile
+    ad attacchi mirati contro gli hub.
+\end{nota}
+
+\subsubsection{Modelli di grafi casuali}
+Relativamente a modelli di grafi casuali è possibile trovare due varianti
+fondamentali, spesso confuse ma matematicamente distinte.
+
+\begin{definizione}{Modello Erdős-Rényi $G(n, M)$}{erdos_renyi_gnm}
+    Nel modello \textbf{$G(n, M)$}, un grafo viene scelto
+    \textbf{uniformemente a caso} dalla raccolta di tutti i grafi possibili
+    che possiedono esattamente:
+    \begin{itemize}
+        \item $n$ nodi (etichettati);
+        \item $M$ archi (fissi).
+    \end{itemize}
+    I nodi sono considerati etichettati, il che significa che due grafi
+    ottenuti l'uno dall'altro permutando i vertici sono considerati distinti.
+    
+\end{definizione}
+
+\begin{esempio}{Esempio di $G(n, M)$}{}
+    Nel modello $G(3, 2)$ (3 nodi, 2 archi), esistono esattamente 3 possibili
+    grafi distinti. Ciascuno di questi ha una probabilità di inclusione pari a
+    $\frac{1}{3}$.
+    
+    \begin{center}
+    \begin{tikzpicture}[scale=0.9]
+        % Stile dei nodi
+        \tikzset{v/.style={circle, draw=black, fill=white, inner sep=2pt, minimum size=15pt, font=\small\bfseries}}
+        
+        % --- GRAFO 1: Collegamenti (1-2) e (2-3) ---
+        \begin{scope}[xshift=0cm]
+            \node[v] (1) at (0,0) {1};
+            \node[v] (2) at (2,0) {2};
+            \node[v] (3) at (1,1.5) {3};
+            % Archi
+            \draw[thick] (1) -- (2);
+            \draw[thick] (2) -- (3);
+            % Etichetta
+            \node at (1, -0.8) {Caso 1};
+        \end{scope}
+
+        % --- GRAFO 2: Collegamenti (1-3) e (2-3) ---
+        \begin{scope}[xshift=4cm]
+            \node[v] (1) at (0,0) {1};
+            \node[v] (2) at (2,0) {2};
+            \node[v] (3) at (1,1.5) {3};
+            % Archi
+            \draw[thick] (1) -- (3);
+            \draw[thick] (2) -- (3);
+            % Etichetta
+            \node at (1, -0.8) {Caso 2};
+        \end{scope}
+
+        % --- GRAFO 3: Collegamenti (1-2) e (1-3) ---
+        \begin{scope}[xshift=8cm]
+            \node[v] (1) at (0,0) {1};
+            \node[v] (2) at (2,0) {2};
+            \node[v] (3) at (1,1.5) {3};
+            % Archi
+            \draw[thick] (1) -- (2);
+            \draw[thick] (1) -- (3);
+            % Etichetta
+            \node at (1, -0.8) {Caso 3};
+        \end{scope}
+    \end{tikzpicture}
+    \end{center}
+    
+    Essendo i nodi \textbf{etichettati}, queste tre configurazioni sono considerate distinte, anche se topologicamente identiche (sono tutte un cammino di lunghezza 2). Poiché sono le uniche possibilità con $M=2$, la probabilità di estrarne una a caso è $1/3$.
+\end{esempio}
+
+\begin{definizione}{Modello Gilbert $G(n, p)$}{gilbert_gnp}
+    Nel modello \textbf{$G(n, p)$}, introdotto da Gilbert (spesso chiamato
+    anche modello Erdős-Rényi-Gilbert), si costruisce un grafo su $n$ nodi
+    etichettati collegando le coppie di nodi in modo probabilistico.
+    
+    Ogni possibile arco viene incluso nel grafo con una probabilità fissa $p$,
+    \textbf{indipendentemente} da ogni altro arco.
+    La probabilità di generare uno specifico grafo che ha $n$ nodi e $M$
+    archi è data dalla formula:
+    \[
+        P(G) = p^M (1-p)^{\binom{n}{2} - M}
+    \]
+    Il parametro $p$ agisce come una funzione di ponderazione:
+    \begin{itemize}
+        \item Man mano che $p$ aumenta da 0 a 1, diventa più probabile
+        generare grafi densi (con più archi).
+        \item Il caso $p = \frac{1}{2}$ corrisponde alla situazione in cui
+        tutti i $2^{\binom{n}{2}}$ grafi possibili su $n$ vertici sono
+        equiprobabili.
+    \end{itemize}
+\end{definizione}
+
+\begin{nota}{Confronto tra $G(n, M)$ e $G(n, p)$}{}
+    La differenza sostanziale risiede nel numero di archi:
+    \begin{itemize}
+        \item In $G(n, M)$ il numero di archi è deterministico
+        (è sempre esattamente $M$).
+        \item In $G(n, p)$ il numero di archi è una variabile casuale
+        binomiale, con valore atteso $\binom{n}{2}p$.
+    \end{itemize}
+    Entrambi i modelli, per $n$ grande, tendono a generare reti con una
+    distribuzione dei gradi che approssima una
+    \textbf{distribuzione di Poisson} (nessun hub, nodi omogenei).
+\end{nota}
+
+\begin{esempio}{Confronto modelli in casi reali}{road_vs_air}
+    Un'analogia classica per comprendere la differenza strutturale tra reti
+    casuali e reti scale-free è il confronto tra la rete autostradale e la
+    rete delle rotte aeree.
+
+    Nella \textbf{rete autostradale}, la maggior parte delle città ha un
+    numero simile di collegamenti (es. 3 - 4 autostrade), con poche eccezioni.
+    Questo porta a una distribuzione dei gradi che segue una curva di
+    \textbf{Poisson}, tipica delle reti casuali.
+    È fisicamente impossibile per una città avere $10.000$ autostrade che la
+    collegano direttamente a tutte le altre.
+    La rete è quindi \textbf{omogenea}: non esistono hub dominanti e i nodi
+    non presentano preferenze di collegamenti.
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/11.png}
+    \caption{
+        Rete autostradale degli Stati Uniti (b) con rispettiva distribuzione
+        dei gradi simile a una distribuzione di Poisson (a).
+    }
+    \end{figure}
+
+    Nelle \textbf{reti aeree}, invece, la maggior parte degli aeroporti ha pochi
+    collegamenti, mentre pochi aeroporti (hub) come Chicago o Atlanta
+    hanno un numero enorme di connessioni.
+    Questo porta a una distribuzione dei gradi che segue una \textbf{Legge di
+    Potenza}, tipica delle reti scale-free.
+    La rete è quindi \textbf{eterogenea}: la presenza di hub rende la rete
+    molto efficiente (pochi scali per arrivare ovunque) ma fragile se gli hub
+    venissero rimossi.
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/12.png}
+    \caption{
+        Rete aerea degli Stati Uniti (d) con rispettiva distribuzione
+        dei gradi simile a una legge di Potenza (c).
+    }
+    \end{figure}
+
+    È possibile osservare come la struttura della rete influenzi
+    significativamente la distribuzione dei gradi e le proprietà globali
+    della rete stessa.
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/13.png}
+    \caption{
+        Confronto tra grafo autostradale (c) e grafo aereo (d).
+    }
+    \end{figure}
+\end{esempio}
+
+\subsubsection{Teoria della percolazione}
+La \textbf{teoria della percolazione} studia la rimozione casuale di archi
+(o nodi) da un grafo e analizza come questa rimozione influenzi la
+connettività globale della rete.
+
+Il modello Gilbert $G(n, p)$ (\Cref{def:gilbert_gnp}) può essere interpretato
+come un processo di percolazione sui collegamenti di un grafo completo $K_n$:
+ogni arco del grafo completo viene mantenuto con probabilità $p$ ed eliminato
+con probabilità $(1-p)$.
+
+Questo processo è detto \textbf{percolazione dei collegamenti non pesata} e
+permette di studiare fenomeni come:
+\begin{itemize}
+    \item La \textbf{componente connessa gigante}: per valori di $p$ sufficientemente
+    alti, emerge una componente connessa che contiene una frazione significativa
+    dei nodi.
+    \item La \textbf{soglia di percolazione}: esiste un valore critico
+    $p_c \approx \frac{1}{n}$ oltre il quale la rete passa da frammentata a
+    connessa.
+\end{itemize}
+
+
+\subsection{Misure di Centralità}
+
+La \textbf{centralità} è un concetto che viene tipicamente applicato ai
+vertici di un grafo e per descriverne una caratteristica di
+\textbf{importanza topologica} di un nodo all'interno della rete,
+sia a livello locale che globale.
+La centralità può essere utilizzata non solo per studiare staticamente le
+proprietà di un grafo ma per descrivere come un grafo potrebbe cambiare
+nel tempo e quali conseguenze avrebbe l’inserimento o la cancellazione di
+vertici o archi dal grafo.
+
+\begin{nota}{Applicazioni delle misure di centralità}{}
+    Le misure di centralità trovano applicazioni in vari campi, tra cui:
+    \begin{itemize}
+        \item \textbf{Reti sociali}: Identificazione di individui influenti.
+        \item \textbf{Epidemiologia}: Studio della diffusione delle malattie.
+        \item \textbf{Ingegneria delle reti}: Ottimizzazione del traffico e della
+        comunicazione.
+    \end{itemize}
+\end{nota}
+

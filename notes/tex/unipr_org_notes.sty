@@ -26,6 +26,7 @@
 \definecolor{cs@example}{HTML}{22863a}
 \definecolor{cs@definition}{HTML}{d73a49}
 \definecolor{cs@note}{HTML}{fcd2b6}
+\definecolor{cs@corollary}{HTML}{17a2b8}
 
 % --- Pacchetti per Layout e Stile ---
 \RequirePackage{titlesec}
@@ -72,6 +73,10 @@ overlay unbroken and last={\node[anchor=south east, font=\small, text=black] at 
 {enhanced, colback=cs@proposition!5, colframe=cs@proposition, fonttitle=\bfseries\sffamily, coltitle=white!90!cs@proposition, breakable
 }{prop}
 
+\newtcbtheorem[number within=section]{corollario}{Corollario}%
+{enhanced, colback=cs@corollary!5, colframe=cs@corollary, fonttitle=\bfseries\sffamily, coltitle=white!90!cs@corollary, breakable
+}{cor}
+
 \newtcbtheorem[number within=section]{definizione}{Definizione}%
 {enhanced, colback=cs@definition!5, colframe=cs@definition, fonttitle=\bfseries\sffamily, coltitle=white!90!cs@definition, breakable
 }{def}
@@ -90,6 +95,7 @@ overlay unbroken and last={\node[anchor=south east, font=\small, text=black] at 
 % --- Definizioni per Cleveref ---
 \crefname{tcb@cnt@teorema}{teorema}{teoremi}
 \crefname{tcb@cnt@proposizione}{proposizione}{proposizioni}
+\crefname{tcb@cnt@corollario}{corollario}{corollari}
 \crefname{tcb@cnt@definizione}{definizione}{definizioni}
 \crefname{tcb@cnt@esempio}{esempio}{esempi}
 \crefname{tcb@cnt@esercizio}{esercizio}{esercizi}
@@ -98,6 +104,7 @@ overlay unbroken and last={\node[anchor=south east, font=\small, text=black] at 
 
 \Crefname{tcb@cnt@teorema}{Teorema}{Teoremi}
 \Crefname{tcb@cnt@proposizione}{Proposizione}{Proposizioni}
+\Crefname{tcb@cnt@corollario}{Corollario}{Corollari}
 \Crefname{tcb@cnt@definizione}{Definizione}{Definizioni}
 \Crefname{tcb@cnt@esempio}{Esempio}{Esempi}
 \Crefname{tcb@cnt@esercizio}{Esercizio}{Esercizi}
