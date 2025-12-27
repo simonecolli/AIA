@@ -187,7 +187,7 @@ Uno dei concetti fondamentali nella ricerca sui grafi è quello di distanza.
 \subsection{Circuiti Euleriani e Hamiltoniani}
 
 Gli algoritmi di esplorazione si occupano spesso di trovare percorsi che
-soddisfano determinate proprietà globali.
+    soddisfano determinate proprietà globali.
 
 \begin{definizione}{Circuito in un grafo}{circuit}
     Un \textbf{circuito (o anello)} in un grafo è un cammino che inizia e
@@ -566,3 +566,184 @@ vertici o archi dal grafo.
     \end{itemize}
 \end{nota}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/14.png}
+    \caption{
+        Panoramica di alcune misure di centralità.
+    }
+\end{figure}
+
+\subsubsection{Centralità di grado (Degree Centrality)}
+È la misura più semplice e conta il numero di archi incidenti su un nodo.
+Per un nodo $u$, è semplicemente il suo grado
+\[
+C_D(u) = \text{deg}(u) = |N_u|
+\]
+dove $|N_u|$ è il numero di vicini del nodo $u$.
+
+\subsubsection{Centralità di intermediazione (Betweenness Centrality)}
+Misura il numero di volte in cui un nodo si trova sul cammino minimo tra altre
+due coppie di nodi. La formula è:
+\[
+C_B(u) = \sum_{s \neq u \neq t} \frac{\rho(s, u, t)}{\rho(s, t)}
+\]
+dove $\rho(s, t)$ è il numero totale di cammini minimi tra i nodi $s$ e $t$,
+e $\rho(s, u, t)$ è il numero di tali cammini che passano attraverso il nodo $u$.
+
+\subsubsection{Centralità di vicinanza (Closeness Centrality)}
+Misura quanto un nodo è vicino a tutti gli altri nodi della rete.
+È definita come l'inverso della somma delle distanze minime da un nodo a
+tutti gli altri.
+\[
+C_C(u) = \frac{1}{\sum_{v \in V} \text{dist}(u, v)}
+\]
+dove $\text{dist}(u, v)$ è la distanza del cammino minimo tra $u$ e $v$.
+
+\subsubsection{Centralità dell'autovettore (Eigenvector Centrality)}
+Assegna un'importanza relativa ai nodi in base al principio che le
+connessioni a nodi importanti contano di più. La centralità di un nodo è
+proporzionale alla somma delle centralità dei suoi vicini.
+È calcolata come la componente dell'autovettore corrispondente all'autovalore
+più grande della matrice di adiacenza.
+
+\subsubsection{Centralità di sottografo (Subgraph Centrality)}
+Misura la partecipazione di un nodo a tutti i sottografi (in particolare,
+cammini chiusi) della rete. I cammini di lunghezza maggiore sono pesati meno.
+\[
+C_S(u) = \sum_{k=0}^{\infty} \frac{\mu_k(u)}{k!}
+\]
+dove $\mu_k(u)$ è il numero di cammini chiusi di lunghezza $k$ che partono e
+finiscono in $u$.
+
+\subsubsection{Centralità dell'informazione (Information Centrality)}
+Misura l'importanza di un nodo in termini di flusso di informazione nella
+rete. Si basa sull'inversa della matrice di informazione, che è derivata dalla
+matrice di adiacenza e dalla matrice dei gradi.
+
+\subsection{Misure di centralità su grafi pesati}
+
+Le misure di centralità possono essere estese per tenere conto dei pesi
+degli archi in un grafo. In questo contesto, l'importanza di una connessione
+non è solo binaria (esiste o non esiste), ma è quantificata da un valore
+numerico (il peso). Questo permette un'analisi più fine delle strutture di rete.
+
+\subsubsection{Centralità di grado pesata (Weighted Degree Centrality)}
+Nei grafi pesati, la centralità di grado di un nodo, spesso chiamata
+\textbf{forza} (strength), non conta semplicemente il numero di vicini,
+ma somma i pesi degli archi ad esso incidenti.
+\[
+C_{D,w}(u) = s(u) = \sum_{v \in N_u} w(u,v)
+\]
+dove $w(u,v)$ è il peso dell'arco che collega i nodi $u$ e $v$.
+
+\subsubsection{Centralità di intermediazione pesata (Weighted Betweenness Centrality)}
+Questa misura generalizza la betweenness centrality considerando i
+\textbf{cammini minimi pesati} (weighted shortest paths), ovvero i cammini
+in cui la somma dei pesi degli archi è minima. Un nodo ha un'alta centralità
+di intermediazione pesata se si trova su molti di questi cammini minimi.
+
+\subsubsection{Centralità di vicinanza pesata (Weighted Closeness Centrality)}
+Analogamente alla versione non pesata, misura la ``vicinanza'' di un nodo a
+tutti gli altri, ma utilizza la \textbf{distanza pesata} (somma dei pesi
+lungo il cammino minimo) invece del semplice numero di archi.
+
+\[
+C_{C,w}(u) = \frac{1}{\sum_{v \in V} \text{dist}_w(u, v)}
+\]
+dove $\text{dist}_w(u, v)$ è la distanza pesata minima tra $u$ e $v$.
+
+\subsubsection{Altre misure pesate}
+Anche altre misure di centralità possono essere adattate per i grafi pesati:
+\begin{itemize}
+    \item \textbf{Eigenvector centrality pesata}: Utilizza la matrice di
+    adiacenza pesata, dando più importanza ai collegamenti con pesi maggiori
+    verso nodi già importanti.
+    \item \textbf{Subgraph e information centrality pesate}: Le loro formulazioni
+    matematiche vengono estese per incorporare i pesi degli archi,
+    solitamente attraverso l'uso della matrice di adiacenza pesata.
+\end{itemize}
+
+
+\subsection{Coefficiente di clustering}
+
+Per misurare il grado di raggruppamento dei nodi in una rete, si utilizza
+il \textbf{coefficiente di clustering}.
+\begin{definizione}{Coefficiente di clustering}{clustering_coefficient}
+    Il \textbf{coefficiente di clustering} $C_i$ di un nodo $i$ è
+    definito come il rapporto tra il numero di archi effettivi nel suo
+    vicinato e il numero massimo possibile di archi nel suo vicinato.
+    Formalmente:
+    \[
+    C_i = \frac{|\{e_{jk} : v_j, v_k \in N_i , e_{jk} \in E\}|}{d_i(d_i - 1)}
+    \]
+    dove:
+    \begin{itemize}
+        \item $E_i$ è il numero di archi tra i vicini del nodo $i$.
+        \item $d_i$ è il grado del nodo $i$ (numero di vicini).
+    \end{itemize}
+    Il coefficiente varia tra 0 (nessuna connessione tra i vicini) e 1
+    (tutti i vicini sono connessi tra loro).
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/15.png}
+    \caption{
+        Esempio di grafi con rispettivi coefficienti di clustering.
+    }
+    \end{figure}
+\end{definizione}
+
+\begin{esempio}{Analisi di una rete di interazione proteica}{}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/16.png}
+    \caption{
+        Analisi di una rete di interazione fisica proteina-proteina (a).
+        Vengono mostrate la distribuzione dei gradi (b),
+        la distribuzione delle lunghezze dei cammini minimi (c) e
+        la relazione tra il coefficiente di clustering e il grado dei nodi (d).
+    }
+    \end{figure}
+    
+    L'analisi di una rete di interazione proteica reale permette di osservare
+    diverse proprietà topologiche fondamentali che caratterizzano molte reti
+    complesse.
+    
+    \begin{itemize}
+        \item \textbf{Struttura hub-and-spoke e correlazioni di grado}:
+        Un'ispezione visiva (a) rivela che i nodi con grado elevato (hub)
+        tendono a connettersi a nodi con grado basso, conferendo alla rete
+        una struttura \textbf{hub-and-spoke}.
+        Questo fenomeno, noto come \textbf{disassortatività} (o correlazioni
+        di grado negative), è tipico delle reti biologiche e tecnologiche e
+        ne influenza molte proprietà, come la diffusione di segnali o la
+        robustezza.
+
+        \item \textbf{Proprietà scale-free}: La distribuzione dei gradi (b)
+        mostra che la stragrande maggioranza dei nodi ha pochi collegamenti,
+        mentre coesistono pochi hub altamente connessi.
+        In questa rete, il 69\% dei nodi ha meno di tre collegamenti e l'hub
+        principale ne ha 91. Questa eterogeneità è il segno distintivo delle
+        reti \textbf{scale-free} (a invarianza di scala), la cui topologia è
+        spesso descritta da una legge di potenza.
+
+        \item \textbf{Proprietà small-world}: L'analisi dei cammini minimi (c)
+        rivela che, nonostante la sua dimensione, la rete è ``piccola''.
+        Il diametro è $d_{max} = 14$, ma la distribuzione delle distanze ha
+        un picco pronunciato intorno al valore medio
+        $\langle d \rangle = 5.61$.
+        Ciò significa che la maggior parte delle proteine è raggiungibile da
+        qualsiasi altra attraverso una breve catena di interazioni, una
+        manifestazione della proprietà \textbf{small-world}.
+
+        \item \textbf{Clustering e gerarchia}: La rete mostra un elevato grado
+        di raggruppamento locale, con un coefficiente di clustering medio
+        $\langle C \rangle = 0.12$. L'analisi di $C(k)$ (d) mostra che il
+        coefficiente di clustering è molto più alto per i nodi di basso grado
+        e decresce per gli hub. Questo indica che i nodi meno connessi
+        appartengono a ``comunità'' dense e strettamente interconnesse,
+        mentre i vicinati degli hub sono sparsi.
+        Questa organizzazione è un segno di \textbf{struttura gerarchica}.
+    \end{itemize}
+\end{esempio}
