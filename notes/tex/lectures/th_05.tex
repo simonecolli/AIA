@@ -4,7 +4,7 @@
 % - slide 8
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Grafi}
+\chapter{Grafi e algoritmi su grafi}
 
 \section{Introduzione}
 La teoria dei grafi ha come data di nascita il 1736, anno in cui
@@ -234,7 +234,7 @@ Gli algoritmi di esplorazione si occupano spesso di trovare percorsi che
 \end{dimostrazione}
 
 
-\section{Modelli di Reti}
+\section{Modelli di reti}
 
 Per studiare le proprietà dei grafi reali, si utilizzano diversi modelli
 generativi
@@ -747,3 +747,102 @@ il \textbf{coefficiente di clustering}.
         Questa organizzazione è un segno di \textbf{struttura gerarchica}.
     \end{itemize}
 \end{esempio}
+
+\section{Reti di flusso}
+
+Un problema tipico che viene spesso analizzato utilizzando tecniche della
+teoria dei grafi è il problema de \textbf{flussi sui grafi}.
+La rete può rappresentare un sistema stradale, una rete di computer o una
+rete idrica.
+
+\begin{definizione}{Rete di flusso}{flow_network}
+    Una \textbf{rete di flusso} è un grafo diretto $G=(V,E)$ con:
+    \begin{itemize}
+        \item Un nodo \textbf{sorgente} $s$ con grado uscente positivo.
+        \item Un nodo \textbf{terminale (o pozzo)} $t$ con grado entrante positivo.
+        \item Una \textbf{capacità} $c(e) > 0$ associata ad ogni arco, che
+        rappresenta il massimo materiale trasportabile per unità di tempo.
+    \end{itemize}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_05/17.png}
+    \caption{
+        Esempio di rete di flusso con sorgente $s$, pozzo $t$ e capacità sugli archi.
+    }
+    \end{figure}
+\end{definizione}
+
+\begin{definizione}{Flusso ammissibile}{admissible_flow}
+    Un flusso $f$ è una funzione sugli archi tale che:
+    \begin{itemize}
+        \item \textbf{Vincolo di capacità:} $0 \le f(e) \le c(e)$ per ogni
+        arco.
+        \item \textbf{Conservazione del flusso:} Per ogni nodo intermedio
+        $v \in V \setminus \{s,t\}$, il flusso totale entrante deve essere
+        uguale al flusso totale uscente.
+    \end{itemize}
+    Il \textbf{flusso totale} della rete $F(G)$ è la somma dei flussi uscenti
+    dalla sorgente (o entranti nel pozzo), ovvero:
+    \[
+    F(G) = \sum_{u \in V \mid (s, u) \in E} f(s, u) = \sum_{z \in V \mid (z, t) \in E} f(z, t)
+    \]
+\end{definizione}
+
+\subsection{Massimizzazione del flusso}
+L'obiettivo è massimizzare il trasporto dalla sorgente al terminale.
+Per farlo si utilizza il concetto di \textbf{cammino migliorabile}.
+
+\begin{definizione}{Cammino migliorabile}{augmenting_path}
+    Un cammino migliorabile è un percorso da $s$ a $t$ (considerando il
+    grafo come non diretto) tale che:
+    \begin{itemize}
+        \item Gli archi che puntano in avanti (verso $t$) hanno flusso
+        inferiore alla capacità ($f < c$).
+        \item Gli archi che puntano all'indietro (verso $s$) hanno flusso
+        positivo ($f > 0$).
+    \end{itemize}
+    Se esiste un cammino migliorabile, è possibile aumentare il flusso totale
+    incrementando il flusso sugli archi in avanti e diminuendolo su quelli
+    all'indietro.
+    % TODO aggiungere immagine
+\end{definizione}
+
+\subsection{Teorema del taglio minimo}
+
+
+\begin{definizione}{Taglio (Sezione)}{cut}
+    Una \textbf{sezione (o taglio)} è una partizione dei vertici in due
+    insiemi $P$ e $\hat{P}$ tale che $s \in P$ e $t \in \hat{P}$.
+    La \textbf{capacità della sezione} è la somma delle capacità degli archi
+    che vanno da $P$ a $\hat{P}$:
+    \[
+    k(P, \hat{P}) = \sum_{(u, v) \in E \mid u \in P, v \in \hat{P}} c(u, v)
+    \]
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/th_05/19.png}
+    \caption{
+        Esempio di sezione con capacità pari a $7 + 2 + 2 = 11$
+    }
+    \end{figure}
+\end{definizione}
+
+\begin{nota}{Flusso totale di un grafo}{}
+È evidente che il flusso totale di un grafo può essere calcolato anche
+analizzando il flusso sui lati che attraversano una sezione:
+% TODO completare formula slide 50
+\[
+F(G) = 
+\]
+\end{nota}
+
+\begin{teorema}{Max-Flow Min-Cut}{max_flow_min_cut}
+    Il flusso totale massimo in un grafo è uguale alla capacità della
+    sezione minimale, ovvero:
+    \[
+    F(G) = k(P_m, \hat{P}_m) = \min k(P, \hat{P})
+    \]
+    Questo significa che il collo di bottiglia della rete determina il
+    massimo flusso possibile.
+\end{teorema}
+
