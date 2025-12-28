@@ -86,6 +86,8 @@ Esistono diversi tipologie di grafi, tra queste è possibile trovare:
     \item Grafi pesati (\Cref{def:weighted_graph}).
     \item Multigrafi (\Cref{def:multigraph}).
     \item Ipergrafi (\Cref{def:hypergraph}).
+    \item Grafi irriducibili (\Cref{def:irreducible_graph}).
+    \item Grafi aperiodici (\Cref{def:aperiodic_graph}).
 \end{itemize}
 
 \begin{definizione}{Grafo semplice}{simple_graph}
@@ -143,6 +145,17 @@ Esistono diversi tipologie di grafi, tra queste è possibile trovare:
         \caption{Esempio di ipergrafo.}
     \end{figure}
 \end{definizione}
+
+\begin{definizione}{Grafo irriducibile}{irreducible_graph}
+    Un grafo è \textbf{irriducibile} se esiste un percorso orientato tra
+    ogni coppia di nodi.
+\end{definizione}
+
+\begin{definizione}{Grafo aperiodico}{aperiodic_graph}
+    Un grafo è \textbf{aperiodico} se il massimo comune divisore tra le
+    lunghezze di tutti i cicli presenti nel grafo è 1.
+\end{definizione}
+
 
 \subsection{Distanze e diametro}
 
@@ -846,3 +859,312 @@ F(G) =
     massimo flusso possibile.
 \end{teorema}
 
+
+\section{Random walk}
+
+\begin{definizione}{Random walk}{random_walk}
+    Dato un grafo e un nodo di partenza, un \textbf{random walk} (passeggiata
+    aleatoria) consiste nel selezionare in modo stocastico (random) un vicino
+    del nodo corrente e muoversi verso di esso.
+    La sequenza di nodi ottenuta tramite tale visita casuale costituisce il
+    random walk.
+    
+    Formalmente, se al tempo $t$ ci troviamo nel nodo $u$, al tempo $t+1$
+    ci si sposta in un nodo $v$ adiacente a $u$ con una certa probabilità.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{images/th_05/20.png}
+        \caption{
+            Esempio di sequenza di nodi visitati in un random walk.
+        }
+    \end{figure}
+\end{definizione}
+
+\subsection{Matrice di transizione}
+
+Per rappresentare matematicamente un random walk, si utilizza una matrice di
+transizione derivata dalla matrice di adiacenza del grafo.
+
+\begin{definizione}{Matrice di transizione}{transition_matrix}
+    Una \textbf{matrice di transizione} $P$ (o $M$) è una matrice stocastica
+    dove l'elemento $P_{ij}$ rappresenta la probabilità di muoversi dal
+    nodo $i$ al nodo $j$.
+    
+    In un grafo non pesato, se il nodo $i$ ha grado $d_i$, la probabilità
+    di spostarsi verso un vicino $j$ è uniforme, ovvero:
+    \[
+    P_{ij} = \begin{cases} 
+        \frac{1}{d_i} & \text{se } (i, j) \in E \\
+        0 & \text{altrimenti}
+    \end{cases}
+    \]
+    Una proprietà fondamentale della matrice di transizione è che la somma
+    dei valori di ogni riga deve essere uguale a 1 (normalizzazione delle
+    probabilità).
+\end{definizione}
+
+\begin{esempio}{Dalla matrice di adiacenza alla matrice di transizione}{}
+    Consideriamo un grafo semplice. La matrice di adiacenza $A$ indica solo
+    la presenza di connessioni (1 o 0).
+    La matrice di transizione $P$ normalizza queste connessioni in base al
+    grado del nodo di partenza.
+    
+    \textbf{Matrice di adiacenza ($A$):}
+    \[
+    A = \begin{bmatrix}
+    0 & 1 & 1 & 0 \\
+    1 & 0 & 1 & 1 \\
+    0 & 0 & 0 & 1 \\
+    0 & 0 & 1 & 0
+    \end{bmatrix}
+    \]
+    
+    \textbf{Matrice di transizione ($P$):}
+    Dividendo ogni 1 per il grado del nodo corrispondente alla riga
+    (rispettivamente gradi 2, 3, 1, 1), otteniamo:
+    \[
+    P = \begin{bmatrix}
+    0 & 1/2 & 1/2 & 0 \\
+    1/3 & 0 & 1/3 & 1/3 \\
+    0 & 0 & 0 & 1 \\
+    0 & 0 & 1 & 0
+    \end{bmatrix}
+    \]
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/th_05/21.png}
+        \caption{
+            Confronto tra matrice di adiacenza e matrice di
+            transizione di uno stesso grafo.
+        }
+    \end{figure}
+\end{esempio}
+
+\subsection{Catene di Markov}
+
+Il concetto di random walk è strettamente legato a quello delle catene di Markov.
+
+\begin{definizione}{Catena di Markov}{markov_chain}
+    Una \textbf{catena di Markov} descrive un processo stocastico su un
+    insieme di stati $S = \{s_1, s_2, \ldots, s_n\}$ (corrispondono ai nodi
+    del grafo).
+    Il processo avviene in accordo con una matrice di transizione
+    probabilistica $P = \{P_{ij}\}$, dove $P_{ij}$ è la probabilità di passare
+    dallo stato $s_i$ allo stato $s_j$.
+    
+    La caratteristica fondamentale (proprietà di Markov) è l'assenza di
+    memoria: la probabilità di transizione futura dipende unicamente dallo
+    stato attuale e non dalla storia precedente dei passi.
+\end{definizione}
+
+\subsection{Distribuzioni stazionarie}
+
+Una domanda fondamentale riguarda il comportamento del random walk per tempi
+lunghi; se si lascia camminare il ``walker'' all'infinito, qual è la
+probabilità che si trovi in un determinato nodo?
+
+\begin{definizione}{Distribuzione stazionaria}{stationary_distribution}
+    Sia $x_t(i)$ la probabilità che un ``walker'' (la testa della random walk)
+    sia al nodo $i$ al tempo $t$, allora:
+    \begin{itemize}
+        \item $x_{t+1}(j) = \sum_i x_t(i) \cdot P_{ij}$
+        \item $x_{t+1} = x_t \cdot P = x_{t-1} \cdot P \cdot P = x_{t-2} \cdot P \cdot P \cdot P = x_0 \cdot P^t$
+    \end{itemize}
+    
+    Una distribuzione $\pi$ è detta \textbf{stazionaria} se $\pi = \pi \cdot P$..
+    Tale distribuzione per un dato nodo è associata all'ammontare delle volte
+    in cui un random walk, eseguito per un tempo sufficientemente lungo,
+    visita quel nodo.
+\end{definizione}
+
+\begin{nota}{Distribuzione stazionaria su grafi irriducibili e aperiodici}{}
+Per particolari tipologie di grafi, quali quelli irriducibili
+(\Cref{def:irreducible_graph}) e aperiodici (\Cref{def:aperiodic_graph}),
+la distribuzione stazionaria non dipende da quella di partenza.
+\end{nota}
+
+\begin{teorema}{Convergenza su grafi non orientati}{}
+    Per un grafo non orientato, connesso e non bipartito, il random walk converge a una distribuzione stazionaria unica $\pi$, dove la probabilità di trovarsi nel nodo $v$ è proporzionale al suo grado:
+    \[
+    \pi_v = \frac{d(v)}{2m}
+    \]
+    dove $d(v)$ è il grado del nodo e $2m$ è la somma totale dei gradi (volume del grafo).
+    
+    Ciò implica che un camminatore casuale passerà molto più tempo negli \textbf{hub} (nodi ad alto grado) che nei nodi periferici.
+\end{teorema}
+
+\subsection{Hitting time e commute time}
+
+Oltre alla probabilità di trovarsi in un nodo, è utile misurare
+``quanto tempo'' (in numero di passi) è necessario per raggiungere
+determinati nodi.
+
+\begin{definizione}{Hitting time}{hitting_time}
+    L'\textbf{hitting time} (o tempo di primo passaggio) $h_{uv}$ è il numero
+    atteso di passi necessari per raggiungere il nodo $v$ partendo dal nodo
+    $u$ per la prima volta.
+    Formalmente, è definito dalla ricorrenza:
+    \[
+    h_{uv} = 
+    \begin{cases} 
+        0 & \text{se } u = v \\
+        1 + \sum_{w \in V} P_{uw} h_{wv} & \text{se } u \neq v 
+    \end{cases}
+    \]
+\end{definizione}
+
+\begin{nota}{Ritorno atteso}{}
+    Un caso particolare è il tempo di ritorno atteso $h_{uu}$, ovvero il
+    tempo medio per tornare al nodo di partenza.
+    Per il teorema di Kac, questo è l'inverso della probabilità stazionaria:
+    \[
+    h_{uu} = \frac{1}{\pi_u} = \frac{2m}{d(u)}
+    \]
+\end{nota}
+
+\begin{definizione}{Commute time}{commute_time}
+    Il \textbf{commute time} $C_{uv}$ è il numero atteso di passi necessari
+    per andare da $u$ a $v$ e tornare indietro a $u$. È definito come:
+    \[
+    C_{uv} = h_{uv} + h_{vu}
+    \]
+    A differenza dell'hitting time (che non è simmetrico,
+    $h_{uv} \neq h_{vu}$), il commute time è una misura simmetrica
+    ($C_{uv} = C_{vu}$) e rappresenta una distanza metrica sul grafo.
+\end{definizione}
+
+\begin{nota}{Relazione con la distanza fisica}{}
+    Mentre la distanza geodetica (shortest path) misura il cammino più
+    breve, il commute time tiene conto di \textbf{tutti i cammini possibili}
+    tra due nodi. Due nodi possono essere vicini in termini di shortest
+    path (pochi passi), ma avere un commute time alto se sono collegati
+    solo da un ``ponte'' stretto che è difficile da imboccare per un
+    camminatore casuale.
+    Viceversa, nodi in cluster densi hanno un commute time basso tra loro.
+\end{nota}
+
+\subsection{PageRank}
+
+Il random walk è stato utilizzato per ordinare le pagine web per rilevanza
+sencondo una topologia dettata dai collegamenti ipertestuali contenuti.
+
+Questo algoritmo è noto come Pagerank (1999) ed è alla base del motore di
+ricerca Google.
+L'algoritmo in questione lavora sul grafo del Web, che è composto da 2 tipi di
+nodi: pagine web e argomenti in esse discussi.
+Esegue i seguenti passi:
+\begin{itemize}
+    \item Simulazione di un random walker sul grafo del Web.
+    \item Il walker salta in modo arbitrario da una pagina all'altra secondo
+    delle probabilità non nulle.
+    \item Una pagina viene considerata imporante se un'altra pagina punta
+    ad essa:
+    \[
+        s(i) = \sum_{j \in adj(i)} \frac{s(j)}{deg(j)}
+    \]
+    \item $s$ viene utilizzata come distribuzione stazionaria del random walk
+    sul grafo del Web.
+\end{itemize}
+
+\subsubsection{Power iteration}
+Per effettuare il calcolo della distribuzione stazionaria viene utilizzato
+l'algoritmo di \textbf{power iteration}.
+
+\begin{definizione}{Algoritmo power iteration}{alg_power_iteration}
+    L'algoritmo procede come segue:
+    \begin{enumerate}
+        \item Parti con una distribuzione iniziale $x_0$ (ad esempio, uniforme).
+        \item Calcola $x_{t+1} = x_t \cdot P$ (moltiplicazione della
+        distribuzione corrente per la matrice di transizione).
+        \item Itera fino a che $x_{t+1}$ non cambia relativamente di
+        molto rispetto a $x_t$ (convergenza).
+        \item Una volta terminato, utilizza la distribuzione stazionaria per
+        determinare il grado di similarità/rilevanza tra un argomento ed una
+        pagina web.
+    \end{enumerate}
+\end{definizione}
+
+
+\begin{teorema}{Convergenza per catene irriducibili e aperiodiche}{}
+    Se una catena di Markov è un grafo irriducibile
+    (\Cref{def:irreducible_graph}) e aperiodico (\Cref{def:aperiodic_graph}), allora
+    l'autovalore più grande della matrice di transizione è uguale a 1 e tutti
+    gli altri autovalori hanno modulo strettamente minore di 1. Questo
+    garantisce la convergenza del power iteration verso un'unica
+    distribuzione stazionaria.
+\end{teorema}
+
+\subsection{Random walk con restart}
+In grafi che sono non irriducibili o periodici, il random walk classico
+potrebbe non convergere a una distribuzione stazionaria unica.
+Infatti esistono nodi che non sono raggiungibili da altri nodi, o
+sottografi che si ripetono ciclicamente.
+Per ovviare a questo problema, si utilizza una variante chiamata
+\textbf{random walk con restart}.
+Ad ogni iterazione il walker ha una probabilità di trasportarsi in un nodo
+qualsiasi del grafo.
+In questa situazione la matrice di transizione viene modificata come segue:
+\[
+\hat{P} = (1 - c) \cdot P + c \cdot U
+\]
+con $U_{ij} = \frac{1}{n}\forall i,j$, U distribuzione uniforme e $c$ è la
+probabilità di restart.
+
+\begin{nota}{Random walk con restart}{}
+    Nel modello con restart, ad ogni passo il camminatore ha due opzioni:
+    \begin{enumerate}
+        \item Con probabilità $\alpha$, segue un arco uscente verso un vicino
+        (come nel random walk classico).
+        \item Con probabilità $1-\alpha$, effettua un ``teletrasporto''
+        (restart) tornando al nodo di partenza o saltando su un nodo casuale
+        della rete.
+    \end{enumerate}
+    Questo meccanismo è alla base dell'algoritmo \textbf{Personalized
+    PageRank}. Se due nodi appartengono allo stesso cluster, è probabile che
+    un random walk con restart che parte da uno di essi rimanga all'interno
+    del cluster piuttosto che uscirne.
+\end{nota}
+
+\section{Flusso stocastico}
+I random walk possono essere utilizzati per simulare un
+\textbf{flusso stocastico} all'interno della rete, utile per identificare
+le comunità (clustering).
+
+\begin{definizione}{Flusso e cluster}{stochastic_flow}
+    L'intuizione è che il flusso stocastico scorre più facilmente all'interno
+    di un cluster (dove ci sono molti collegamenti) che tra cluster diversi
+    (collegati da pochi archi).
+    Se un random walk parte da un nodo all'interno di un gruppo denso,
+    tenderà a rimanervi intrappolato per lungo tempo prima di trovare un arco
+    che lo porti fuori.
+\end{definizione}
+
+Questo principio è alla base dell'algoritmo \textbf{MCL (Markov CLustering)},
+che simula il flusso alternando due operazioni sulla matrice di transizione:
+\begin{itemize}
+    \item \textbf{Espansione}: Elevamento a potenza della matrice
+    ($M \times M$) per simulare random walk di lunghezza maggiore e
+    diffondere il flusso.
+    \item \textbf{Inflazione}: Elevamento a potenza di ogni
+    singolo elemento della matrice seguito da rinormalizzazione, per
+    rafforzare i collegamenti forti (intra-cluster) e indebolire quelli
+    deboli (inter-cluster).
+\end{itemize}
+
+L'algoritmo MCL itera queste operazioni fino a convergenza, quando la matrice
+di transizione stabilizza i cluster come blocchi distinti.
+Le misure di similarità tra nodi basate sui random walk includono:
+\begin{itemize}
+    \item Distanza di tempo di percorrenza euclidea, il commute time (\Cref{def:commute_time}).
+    \item Una misura di distanza basata sui random walk (\Cref{def:random_walk}) in un grafo.
+    % TODO aggiungere \Cref{def:}
+    \item K-means su tale misura di distanza.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/th_05/22.png}
+    \caption{
+        Esempio di clustering tramite MCL su un grafo.
+    }
+\end{figure}
