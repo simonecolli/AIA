@@ -1168,3 +1168,191 @@ Le misure di similarità tra nodi basate sui random walk includono:
         Esempio di clustering tramite MCL su un grafo.
     }
 \end{figure}
+
+\section{Community detection}
+
+La \textit{community detection} (o rilevamento di comunità) è il problema di
+partizionare un grafo in sottografi (le comunità) in cui i nodi sono
+densamente connessi tra loro, ma scarsamente connessi con i nodi di altre
+comunità.
+
+\begin{esempio}{Il caso del Belgio}{}
+    Nel 2008, Vincent Blondel e i suoi studenti applicarono algoritmi di
+    community detection ai dati delle chiamate telefoniche in Belgio.
+    L'obiettivo era identificare gruppi di individui che parlavano
+    frequentemente tra loro. Il risultato fu che la rete si divise
+    naturalmente in due grandi comunità, che corrispondevano in gran parte ai
+    gruppi linguistici del paese: i fiamminghi di lingua olandese e i valloni
+    di lingua francese. È interessante notare che emerse anche un terzo
+    gruppo, molto più piccolo, che sembrava mediare le comunicazioni tra le
+    due comunità principali, probabilmente localizzato nella regione bilingue
+    di Bruxelles.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/th_05/23.png}
+        \caption{
+            Rappresentazione grafica delle comunità linguistiche in Belgio
+            basata sui dati delle chiamate telefoniche.
+        }
+    \end{figure}
+
+\end{esempio}
+
+\subsection{Ipotesi sulle comunità}
+L'idea di base della community detection si fonda su alcune ipotesi chiave:
+\begin{itemize}
+    \item \textbf{H1 - topologia}: La struttura della comunità di una rete è
+    codificata nella sua topologia (il modo in cui i nodi sono collegati).
+    \item \textbf{H2 - ipotesi di connettività}: Una comunità corrisponde
+    a un sottografo connesso.
+    \item \textbf{H2 - ipotesi di densità}: Una comunità corrisponde a un
+    sottografo localmente denso.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/th_05/24.png}
+    \caption{
+        Esempio di comunità in un grafo.
+    }
+\end{figure}
+
+
+\subsection{K-clique come comunità}
+Una delle prime e più intuitive definizioni di comunità è quella di \textbf{cricca} (clique).
+
+\begin{definizione}{K-clique}{k_clique}
+    Una \textbf{k-cricca} (o k-clique) è un sottografo completo di k nodi, in
+    cui ogni nodo è connesso a ogni altro nodo del sottografo.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/th_05/25.png}
+        \caption{
+            Esempi di k-cricche per k=3,4,5.
+        }
+    \end{figure}
+
+\end{definizione}
+
+Tuttavia, l'uso delle cricche per definire le comunità ha dei limiti:
+\begin{itemize}
+    \item I triangoli (3-clique) sono molto comuni nelle reti reali, ma le
+    cricche più grandi sono rare.
+    \item La definizione è troppo restrittiva: una comunità non richiede che
+    ogni membro sia direttamente connesso a tutti gli altri.
+    \item Trovare la cricca massima in un grafo è un problema
+    computazionalmente intrattabile (NP-hard).
+\end{itemize}
+
+\subsection{Comunità forti e deboli}
+Per superare i limiti delle cricche, sono state introdotte definizioni più
+flessibili basate sulla connettività interna ed esterna di un gruppo di nodi.
+
+Dato un sottografo $C$ con un insieme di nodi $N_C$, per ogni nodo $i \in C$
+possiamo definire:
+\begin{itemize}
+    \item \textbf{Grado interno ($k_i^{int}$)}: Il numero di collegamenti del
+    nodo $i$ verso altri nodi all'interno della stessa comunità $C$.
+    \item \textbf{Grado esterno ($k_i^{ext}$)}: Il numero di collegamenti del
+    nodo $i$ verso nodi al di fuori della comunità $C$.
+\end{itemize}
+
+Sulla base di questi concetti, possiamo definire due tipi di comunità:
+
+\begin{definizione}{Comunità forte}{strong_community}
+    Un sottografo $C$ è una \textbf{comunità forte} se ogni nodo al suo
+    interno ha più collegamenti interni che esterni. Formalmente:
+    \[
+    k_i^{int} > k_i^{ext} \quad \forall i \in C
+    \]
+\end{definizione}
+
+\begin{definizione}{Comunità debole}{weak_community}
+    Un sottografo $C$ è una \textbf{comunità debole} se la somma totale dei
+    gradi interni è maggiore della somma totale dei gradi esterni.
+    Formalmente:
+    \[
+    \sum_{i \in C} k_i^{int} > \sum_{i \in C} k_i^{ext}
+    \]
+\end{definizione}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/th_05/26.png}
+    \caption{
+        Esempio di k-clique (a), comunità forte (b) e comunità debole (c).
+    }
+\end{figure}
+
+\subsection{Bisezione di grafi}
+
+Un approccio diverso al rilevamento di comunità è il partizionamento di grafi,
+che mira a dividere una rete in un numero predefinito di gruppi.
+Il caso più semplice è la \textbf{bisezione}.
+
+\begin{definizione}{Bisezione di un grafo}{graph_bisection}
+    La \textbf{bisezione} di un grafo consiste nel dividere i nodi in due+
+    sottogruppi di dimensioni simili (o uguali), in modo tale che il numero
+    di archi che collegano i due gruppi (il \textbf{taglio})
+    sia minimo.
+\end{definizione}
+
+\begin{nota}{Partizionamento vs community detection}{}
+    Mentre il partizionamento richiede di specificare a priori il numero di
+    comunità, la community detection mira a scoprire la struttura intrinseca
+    della rete senza questa assunzione.
+\end{nota}
+
+\subsubsection{Algoritmo di Kerninghan-Lin}
+L'\textbf{algoritmo di Kerninghan-Lin (1970)} è un'euristica classica per il
+problema della bisezione. Funziona come segue:
+\begin{enumerate}
+    \item Inizia con una partizione casuale dei nodi in due gruppi di uguali
+    dimensioni, $A$ e $B$.
+    \item Itera su tutte le possibili coppie di nodi $(a, b)$ con $a \in A$ e
+    $b \in B$.
+    \item Per ogni coppia, calcola il \textbf{guadagno} (la riduzione della
+    dimensione del taglio) che si otterrebbe scambiando i due nodi.
+    \item Identifica la coppia che produce il guadagno massimo e la scambia,
+    anche se il guadagno è negativo. I nodi scambiati vengono ``bloccati'' e
+    non possono essere scambiati di nuovo in quella passata.
+    \item Ripeti il processo fino a quando tutti i nodi sono stati scambiati
+    una volta.
+    \item Alla fine della passata, torna alla partizione che ha prodotto il
+    taglio di dimensione minima durante la sequenza di scambi.
+    \item Ripeti l'intero processo (passate multiple) finché una passata non
+    produce alcun miglioramento nella dimensione del taglio.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/th_05/27.png}
+    \caption{
+        Esempio di bisezione di un grafo tramite l'algoritmo di
+        Kerninghan-Lin.
+    }
+\end{figure}
+
+
+\subsection{Numero di comunità e partizioni}
+A differenza del partizionamento, nel rilevamento di comunità il numero e la
+dimensione delle comunità non sono noti a priori.
+Il problema generale è trovare la migliore \textbf{partizione} di nodi, dove
+ogni nodo appartiene a un solo gruppo.
+
+Il numero totale di modi in cui un insieme di $N$ nodi può essere partizionato
+in comunità è dato dal \textbf{numero di Bell}, $B_N$.
+\[
+B_N = \frac{1}{e} \sum_{j=0}^{\infty} \frac{j^N}{j!}
+\]
+Questo numero cresce in modo super-esponenziale, rendendo impraticabile
+la ricerca esaustiva di tutte le possibili partizioni.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.2\textwidth]{images/th_05/28.png}
+    \caption{
+        Crescita del numero di Bell $B_N$ con il numero di nodi $N$.
+    }
+\end{figure}
