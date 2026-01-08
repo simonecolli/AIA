@@ -345,7 +345,7 @@ per studiare le proprietà matematiche dei grafi.
 Tra questi è possbile trovare:
 \begin{itemize}
     \item Modello Barabási-Albert (\Cref{def:barabasi_albert}).
-    \item Modello Erdős-Rényi $G(n, M)$ (\Cref{def:erdos_renyi_gnm}).
+    \item Modello Erd\H{o}s-Rényi $G(n, M)$ (\Cref{def:erdos_renyi_gnm}).
     \item Modello Gilbert $G(n, p)$ (\Cref{def:gilbert_gnp}).
 \end{itemize}
 
@@ -386,7 +386,7 @@ Tra questi è possbile trovare:
 Relativamente a modelli di grafi casuali è possibile trovare due varianti
 fondamentali, spesso confuse ma matematicamente distinte.
 
-\begin{definizione}{Modello Erdős-Rényi $G(n, M)$}{erdos_renyi_gnm}
+\begin{definizione}{Modello Erd\H{o}s-Rényi $G(n, M)$}{erdos_renyi_gnm}
     Nel modello \textbf{$G(n, M)$}, un grafo viene scelto
     \textbf{uniformemente a caso} dalla raccolta di tutti i grafi possibili
     che possiedono esattamente:
@@ -452,7 +452,7 @@ fondamentali, spesso confuse ma matematicamente distinte.
 
 \begin{definizione}{Modello Gilbert $G(n, p)$}{gilbert_gnp}
     Nel modello \textbf{$G(n, p)$}, introdotto da Gilbert (spesso chiamato
-    anche modello Erdős-Rényi-Gilbert), si costruisce un grafo su $n$ nodi
+    anche modello Erd\H{o}s-Rényi-Gilbert), si costruisce un grafo su $n$ nodi
     etichettati collegando le coppie di nodi in modo probabilistico.
     
     Ogni possibile arco viene incluso nel grafo con una probabilità fissa $p$,
@@ -566,7 +566,7 @@ vertici di un grafo e per descriverne una caratteristica di
 sia a livello locale che globale.
 La centralità può essere utilizzata non solo per studiare staticamente le
 proprietà di un grafo ma per descrivere come un grafo potrebbe cambiare
-nel tempo e quali conseguenze avrebbe l’inserimento o la cancellazione di
+nel tempo e quali conseguenze avrebbe l'inserimento o la cancellazione di
 vertici o archi dal grafo.
 
 \begin{nota}{Applicazioni delle misure di centralità}{}
@@ -1561,11 +1561,11 @@ La procedura è la seguente:
 \begin{esempio}{Rete di collaborazione dei fisici}{collaboration_network}
     Si consideri la rete di collaborazione tra fisici, composta da N=56.276
     scienziati di tutte le branche della fisica che hanno pubblicato articoli su
-    arxiv.org (\ref{fig:th_05_34}). L’algoritmo greedy prevede circa 600 comunità con una
+    arxiv.org (\ref{fig:th_05_34}). L'algoritmo greedy prevede circa 600 comunità con una
     modularità di picco M = 0,713. Quattro di queste comunità sono molto
     grandi, insieme contengono il 77\% di tutti i nodi (Figura a). Nella
     comunità più grande, il 93\% degli autori pubblica in fisica della materia
-    condensata, mentre l’87\% degli autori nella seconda comunità più grande
+    condensata, mentre l'87\% degli autori nella seconda comunità più grande
     pubblica in fisica delle alte energie, indicando che ogni comunità rilevata
     contiene fisici con interessi professionali simili.
 
@@ -1822,7 +1822,7 @@ Per distinguere le comunità reali da quelle che potrebbero emergere
 casualmente in una rete densa, si analizza la soglia di percolazione delle
 k-cricche in un grafo casuale. Una grande comunità di k-cricche emerge solo
 se la probabilità di connessione $p$ supera una soglia critica $p_c(k)$.
-Per un grafo di Erdős-Rényi con $N$ nodi, questa soglia è:
+Per un grafo di Erd\H{o}s-Rényi con $N$ nodi, questa soglia è:
 \[
 p_c(k) \approx \frac{1}{[(k-1)N]^{\frac{1}{k-1}}}
 \]
@@ -1996,5 +1996,4 @@ alla stessa comunità.
         iterativamente l'etichetta di maggioranza nel loro vicinato fino
         a raggiungere uno stato stabile.
     }
-
 \end{figure}
