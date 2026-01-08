@@ -724,7 +724,7 @@ il \textbf{coefficiente di clustering}.
     complesse.
     
     \begin{itemize}
-        \item \textbf{Struttura hub-and-spoke e correlazioni di grado}:
+        \item e\textbf{Struttura hub-and-spoke e correlazioni di grado}:
         Un'ispezione visiva (a) rivela che i nodi con grado elevato (hub)
         tendono a connettersi a nodi con grado basso, conferendo alla rete
         una struttura \textbf{hub-and-spoke}.
@@ -1205,8 +1205,13 @@ L'idea di base della community detection si fonda su alcune ipotesi chiave:
     codificata nella sua topologia (il modo in cui i nodi sono collegati).
     \item \textbf{H2 - ipotesi di connettività}: Una comunità corrisponde
     a un sottografo connesso.
-    \item \textbf{H2 - ipotesi di densità}: Una comunità corrisponde a un
+    \item \textbf{H3 - ipotesi di densità}: Una comunità corrisponde a un
     sottografo localmente denso.
+    \item \textbf{H4 - ipotesi di randomicità}: Reti casuali non dovrebbero
+    avere strutture comunitarie.
+    \item \textbf{H5 - ipotesi di massima modularità}: La partizione con la
+    massima modularità $Q$ (\Cref{def:modularity}) per una data rete offre la struttura ottimale della
+    comunità.
 \end{itemize}
 
 \begin{figure}[H]
@@ -1305,7 +1310,7 @@ Il caso più semplice è la \textbf{bisezione}.
 \end{nota}
 
 \subsubsection{Algoritmo di Kerninghan-Lin}
-L'\textbf{algoritmo di Kerninghan-Lin (1970)} è un'euristica classica per il
+L'\textbf{algoritmo di Kerninghan-Lin} è un'euristica classica per il
 problema della bisezione. Funziona come segue:
 \begin{enumerate}
     \item Inizia con una partizione casuale dei nodi in due gruppi di uguali
@@ -1319,7 +1324,7 @@ problema della bisezione. Funziona come segue:
     non possono essere scambiati di nuovo in quella passata.
     \item Ripeti il processo fino a quando tutti i nodi sono stati scambiati
     una volta.
-    \item Alla fine della passata, torna alla partizione che ha prodotto il
+    \item Alla fine di una passata, torna alla partizione che ha prodotto il
     taglio di dimensione minima durante la sequenza di scambi.
     \item Ripeti l'intero processo (passate multiple) finché una passata non
     produce alcun miglioramento nella dimensione del taglio.
@@ -1355,4 +1360,641 @@ la ricerca esaustiva di tutte le possibili partizioni.
     \caption{
         Crescita del numero di Bell $B_N$ con il numero di nodi $N$.
     }
+\end{figure}
+
+
+\subsection{Clustering gerarchico}
+
+Il clustering gerarchico è una famiglia di algoritmi di community detection
+che produce una gerarchia di cluster, rappresentata solitamente da un
+\textbf{dendrogramma}.
+Esistono due approcci principali:
+\begin{itemize}
+    \item \textbf{Agglomerativo (bottom-up)}: Si parte con ogni nodo in un
+    cluster separato e, a ogni passo, si fondono le coppie di cluster più
+    simili fino a ottenere un unico grande cluster che contiene tutti i nodi.
+    \item \textbf{Divisivo (top-down)}: Si parte con tutti i nodi in un unico
+    cluster e, a ogni passo, si divide un cluster in due finché ogni nodo non
+    si trova nel proprio cluster.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/29.png}
+    \caption{
+        Approccio agglomerativo (sopra) e divisivo (sotto) al clustering gerarchico.
+    }
+\end{figure}
+
+Il risultato è una struttura ad albero (il dendrogramma) che mostra l'ordine
+in cui i cluster vengono fusi o divisi.
+Tagliando il dendrogramma a diverse altezze, si possono ottenere diverse
+partizioni del grafo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/th_05/30.png}
+    \caption{
+        Un dendrogramma risultante da un clustering agglomerativo.
+        Tagliando l'albero a diverse altezze (linee tratteggiate) si
+        ottengono partizioni con un numero diverso di cluster.
+    }
+\end{figure}
+
+\subsubsection{Algoritmi agglomerativi}
+Gli algoritmi agglomerativi uniscono iterativamente nodi e comunità in base a
+una misura di somiglianza. La procedura generale è la seguente:
+\begin{enumerate}
+    \item \textbf{Definizione di una matrice di somiglianza}: Per prima cosa, si
+    calcola una misura di somiglianza per ogni coppia di nodi.
+    Una misura comune è la \textbf{sovrapposizione topologica}:
+    \[
+    X_{ij} = \frac{J(i, j)}{\min(k_i, k_j)}
+    \]
+    dove $J(i, j)$ è il numero di vicini in comune tra i nodi $i$ e $j$, e
+    $k_i, k_j$ sono i loro gradi. Questa misura è alta per nodi che
+    condividono molti vicini rispetto al loro grado.
+
+    \item \textbf{Scielta di una metrica di collegamento}: Si decide
+    come calcolare la somiglianza tra cluster (gruppi di nodi).
+    Le scelte più comuni sono:
+    \begin{itemize}
+        \item \textbf{Collegamento singolo}: La somiglianza tra due cluster è data
+        dalla somiglianza della coppia di nodi più simile tra i due cluster.
+        Tende a produrre cluster ``lunghi'' e filamentosi.
+        \item \textbf{Collegamento completo}: La somiglianza è data dalla coppia di
+        nodi meno simile. Tende a produrre cluster compatti e sferici.
+        \item \textbf{Collegamento medio}: La somiglianza è la media di tutte le
+        somiglianze tra le coppie di nodi dei due cluster. È un compromesso
+        tra i due estremi.
+    \end{itemize}
+
+    \item \textbf{Applicazione del clustering gerarchico}:
+    \begin{itemize}
+        \item Assegna ogni nodo a una comunità a sé stante.
+        \item Trova la coppia di comunità con la più alta somiglianza (secondo
+        la metrica di collegamento scelta) e uniscile.
+        \item Ricalcolo della somiglianza tra la nuova comunità e tutte le altre.
+        \item Ripetiamo il processo fino a quando non rimangono più
+        comunità da unire.
+    \end{itemize}
+    
+    \item \textbf{Costruzione del dendrogramma}: L'ordine in cui i cluster
+    vengono fusi definisce la struttura del dendrogramma.
+\end{enumerate}
+La complessità computazionale di questi algoritmi è tipicamente $O(N^2)$, dove
+$N$ è il numero di nodi.
+
+\subsubsection{Cammini minimi e betweenness}
+\begin{definizione}{Cammino minimo}{shortest_path}
+    Dati due nodi, $u$ e $v$, il \textbf{cammino minimo} che li collega è il
+    percorso costituito dal minor numero di archi possibile.
+    
+    Nel caso di reti pesate (ponderate), è necessario considerare i pesi
+    associati agli archi. In questo contesto, il cammino minimo è definito come
+    il percorso che minimizza la somma dei pesi degli archi attraversati, tra
+    tutti i possibili percorsi che collegano $u$ a $v$.
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/31.png}
+    \caption{
+        Esempi di cammini minimi in un grafo pesato.
+    }
+\end{figure}
+\end{definizione}
+
+\begin{definizione}{Betweenness}{betweenness}
+    La \textbf{betweenness} di un elemento (sia esso un nodo o un arco) è data
+    dal numero di cammini minimi (calcolati tra ogni possibile coppia di nodi
+    della rete) che passano attraverso di esso.
+    Intuitivamente, misura l'importanza di un nodo o arco nel connettere
+    diverse parti della rete.
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/32.png}
+    \caption{
+        Esempi di calcolo della betweenness per nodi (a) e archi (b) in un grafo.
+    }
+\end{figure}
+\end{definizione}
+
+
+\subsubsection{Algoritmi divisivi (Algoritmo di Girvan-Newman)}
+
+Gli algoritmi divisivi funzionano rimuovendo iterativamente gli archi che
+collegano le comunità.
+L'algoritmo più noto di questa categoria è quello di \textbf{Girvan e Newman
+(2002)}, basato sulla centralità di betweenness degli archi.
+
+L'idea è che gli archi che collegano comunità distinte (ponte) avranno
+un'alta betweenness, perché molti dei cammini minimi tra i nodi delle due
+comunità passeranno attraverso di essi.
+
+L'algoritmo procede come segue:
+\begin{enumerate}
+    \item \textbf{Calcolo della betweenness} per tutti gli archi della rete.
+    La betweenness di un arco è il numero di cammini minimi tra tutte le
+    coppie di nodi che passano attraverso quell'arco.
+    \item \textbf{Rimozione dell'arco} con la betweenness più alta. In caso di
+    parità, se ne sceglie uno a caso.
+    \item \textbf{Ricalcolo della betweenness} per tutti gli archi rimanenti.
+    Questo passo è necessario perché la rimozione di un arco può alterare i
+    cammini minimi e quindi le centralità.
+    \item \textbf{Ripetizione} dei passaggi 2 e 3 finché non rimangono più
+    archi.
+\end{enumerate}
+
+Questo processo produce un dendrogramma che mostra come il grafo si scompone
+in componenti connesse. La prima divisione avviene quando la rimozione di un
+arco disconnette il grafo, e così via.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/33.png}
+    \caption{
+        Illustrazione dell'algoritmo di Girvan-Newman. Gli archi con alta
+        betweenness (in grassetto) vengono rimossi progressivamente (a, b, c, d),
+        rivelando la struttura delle comunità. Il dendrogramma (3) mostra
+        la gerarchia delle divisioni.
+    }
+\end{figure}
+
+
+\subsection{Modularità}
+
+\begin{definizione}{Modularità}{modularity}
+    La \textbf{modularità} $Q$ è una misura che quantifica la qualità di una
+    partizione di un grafo in comunità. Essa confronta la densità di archi
+    all'interno delle comunità con quella che ci si aspetterebbe in un grafo
+    casuale con la stessa distribuzione dei gradi.
+    
+    Formalmente, la modularità è definita come:
+    \[
+    Q = \frac{1}{2m} \sum_{i,j} \left( A_{ij} - \frac{d_i d_j}{2m} \right) \delta(c_i, c_j)
+    \]
+    dove:
+    \begin{itemize}
+        \item $A_{ij}$ è l'elemento della matrice di adiacenza (1 se esiste un
+        arco tra i nodi $i$ e $j$, 0 altrimenti).
+        \item $d_i$ e $d_j$ sono i gradi dei nodi $i$ e $j$.
+        \item $m$ è il numero totale di archi nel grafo.
+        \item $\delta(c_i, c_j)$ è una funzione che vale 1 se i nodi $i$ e $j$
+        appartengono alla stessa comunità ($c_i = c_j$), 0 altrimenti.
+    \end{itemize}
+    
+    Un valore di modularità più alto indica una migliore partizione in
+    comunità, con valori tipicamente compresi tra -0.5 e 1.
+\end{definizione}
+
+\subsubsection{Community detection basata sulla modularità}
+Un approccio comune per la community detection è l'utilizzo di un \textbf{algoritmo greedy}, che unisce iterativamente le comunità se tale operazione aumenta la modularità della partizione risultante.
+
+La procedura è la seguente:
+\begin{enumerate}
+    \item \textbf{Inizializzazione}: Assegna ogni nodo a una comunità a sé stante. Si inizia quindi con $N$ comunità (dove $N$ è il numero di nodi).
+    \item \textbf{Valutazione delle fusioni}: Ispeziona ogni coppia di comunità collegate da almeno un arco e calcola la variazione di modularità $\Delta Q$ che si otterrebbe unendo queste due comunità.
+    \item \textbf{Fusione greedy}: Identifica la coppia di comunità che produce il massimo incremento di modularità $\Delta Q$ e uniscile. Si noti che la modularità di una particolare partizione viene sempre calcolata considerando la topologia completa della rete.
+    \item \textbf{Iterazione}: Ripeti i passaggi 2 e 3 fino a quando tutti i nodi non sono fusi in un'unica comunità.
+    \item \textbf{Selezione dell'ottimo}: Durante il processo, registra la modularità ottenuta ad ogni passaggio. Al termine, seleziona la partizione corrispondente al valore massimo di modularità raggiunto.
+\end{enumerate}
+
+\begin{esempio}{Rete di collaborazione dei fisici}{collaboration_network}
+    Si consideri la rete di collaborazione tra fisici, composta da N=56.276
+    scienziati di tutte le branche della fisica che hanno pubblicato articoli su
+    arxiv.org (\ref{fig:th_05_34}). L’algoritmo greedy prevede circa 600 comunità con una
+    modularità di picco M = 0,713. Quattro di queste comunità sono molto
+    grandi, insieme contengono il 77\% di tutti i nodi (Figura a). Nella
+    comunità più grande, il 93\% degli autori pubblica in fisica della materia
+    condensata, mentre l’87\% degli autori nella seconda comunità più grande
+    pubblica in fisica delle alte energie, indicando che ogni comunità rilevata
+    contiene fisici con interessi professionali simili.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{images/th_05/34.png}
+        \caption{
+            Rete di collaborazione tra fisici.
+        }
+        \label{fig:th_05_34} 
+    \end{figure}
+\end{esempio}
+
+\subsubsection{Limiti della modularità}
+
+La modularità, pur essendo una metrica efficace per valutare la qualità delle partizioni in comunità, presenta alcune limitazioni intrinseche.
+
+Considerando due comunità A e B, sia $L_{AB}$ il numero di archi che collegano i nodi di A con i nodi di B, e $L$ il numero totale di archi. La variazione di modularità $\Delta Q_{AB}$ ottenuta unendo le due comunità è data da:
+\[
+\Delta Q_{AB} = \left[ \frac{\Sigma_{in} + 2k_{i,in}}{2m} - \left( \frac{\Sigma_{tot} + k_i}{2m} \right)^2 \right] - \left[ \frac{\Sigma_{in}}{2m} - \left( \frac{\Sigma_{tot}}{2m} \right)^2 - \left( \frac{k_i}{2m} \right)^2 \right]
+\]
+dove:
+\begin{itemize}
+    \item $\Sigma_{in}$ è la somma dei pesi degli archi interni alla comunità $C$.
+    \item $\Sigma_{tot}$ è la somma dei pesi degli archi incidenti ai nodi in $C$.
+    \item $k_i$ è il grado pesato del nodo $i$.
+    \item $k_{i,in}$ è la somma dei pesi degli archi che collegano $i$ ai nodi già presenti in $C$.
+\end{itemize}
+
+Questa relazione evidenzia il \textbf{limite di risoluzione} della modularità: essa tende a favorire comunità di grandi dimensioni e potrebbe non riuscire a rilevare comunità più piccole di una certa grandezza, anche se ben definite internamente. Questo significa che la modularità potrebbe non essere in grado di identificare sottostrutture significative in reti complesse se queste sono al di sotto di una certa soglia dimensionale.
+
+
+\subsection{Algoritmo di Louvain}
+
+L'algoritmo di \textbf{Louvain} è un metodo euristico efficiente per
+l'estrazione di comunità destinato a reti di grandi dimensioni.
+L'approccio si basa sulla massimizzazione della \textbf{modularità}, cercando
+di aumentare la differenza tra il numero di archi effettivi interni a una comunità
+e il numero atteso di archi in un modello casuale.
+Poiché l'ottimizzazione esatta della modularità è un problema NP-hard,
+l'algoritmo utilizza una strategia greedy iterativa.
+
+L'algoritmo di Louvain è suddiviso in due fasi principali che vengono ripetute
+sequenzialmente fino a convergenza:
+\begin{enumerate}
+    \item \textbf{Spostamento locale dei nodi (Modularity optimization)}:
+    I nodi vengono spostati tra comunità per massimizzare la modularità locale.
+    \item \textbf{Aggregazione della rete (Community aggregation)}:
+    Viene costruita una nuova rete in cui le comunità trovate diventano nodi.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/35.png}
+    \caption{
+        Esempio delle fasi dell'algoritmo di Louvain.
+    }
+\end{figure}
+
+Per un grafo pesato, la modularità $Q$ è definita come:
+\[
+Q = m \cdot D(q \| \langle q \rangle)
+\]
+dove:
+\begin{itemize}
+    \item $m$ è il numero totale di archi nella rete.
+    \item $q = \frac{\sum_c m_c}{m}$ è la frazione di archi interni alle
+    comunità, con $m_c$ che rappresenta il numero di archi interni alla
+    comunità $c$.
+    \item $\langle q \rangle = \frac{\sum_c \binom{n_c}{2}}{\binom{n}{2}}$ è la
+    frazione attesa di archi interni, dove $n_c$ è il numero di nodi nella
+    comunità $c$ e $n$ è il numero totale di nodi.
+    \item $D(x \| y) = x \ln\frac{x}{y} + (1-x) \ln\frac{1-x}{1-y}$ è la
+    \textbf{divergenza di Kullback-Leibler} (o divergenza entropica) tra le
+    distribuzioni osservata e attesa.
+\end{itemize}
+
+\subsubsection{Fase 1: Spostamento locale}
+Inizialmente, ogni nodo viene assegnato a una propria comunità distinta.
+Per ogni nodo $i$, l'algoritmo calcola il guadagno di modularità $\Delta Q$
+che si otterrebbe spostando $i$ dalla sua comunità attuale alla comunità
+di uno dei suoi vicini $j$.
+
+La variazione di modularità $\Delta Q$ per lo spostamento di un nodo isolato $i$
+in una comunità $C$ è calcolata come:
+\[
+\Delta Q = \left[ \frac{\Sigma_{in} + 2k_{i,in}}{2m} - \left( \frac{\Sigma_{tot} + k_i}{2m} \right)^2 \right] - \left[ \frac{\Sigma_{in}}{2m} - \left( \frac{\Sigma_{tot}}{2m} \right)^2 - \left( \frac{k_i}{2m} \right)^2 \right]
+\]
+dove:
+\begin{itemize}
+    \item $\Sigma_{in}$ è la somma dei pesi degli archi interni alla comunità $C$.
+    \item $\Sigma_{tot}$ è la somma dei pesi degli archi incidenti ai nodi in $C$.
+    \item $k_i$ è il grado pesato del nodo $i$.
+    \item $k_{i,in}$ è la somma dei pesi degli archi che collegano $i$ ai nodi già presenti in $C$.
+\end{itemize}
+
+L'algoritmo valuta questo valore per tutte le comunità vicine e sposta il nodo
+$i$ in quella che garantisce il \textbf{massimo incremento positivo} di
+modularità. Se nessun spostamento produce un aumento ($\Delta Q \le 0$),
+il nodo rimane nella sua comunità originale.
+Questo processo viene ripetuto sequenzialmente e iterativamente su tutti i nodi
+finché non si verificano più spostamenti (si raggiunge un massimo locale).
+
+\subsubsection{Fase 2: Aggregazione}
+Una volta che la prima fase converge, l'algoritmo riduce la dimensione della rete:
+\begin{enumerate}
+    \item Le comunità identificate diventano singoli ``super-nodi'' nel nuovo grafo.
+    \item Gli archi interni a una comunità (archi tra nodi della stessa comunità)
+    vengono trasformati in \textbf{self-loops} (cappi) sul nuovo nodo, con peso
+    pari alla somma dei pesi originali.
+    \item Gli archi tra nodi di comunità diverse vengono aggregati in un unico
+    arco pesato tra i super-nodi corrispondenti.
+\end{enumerate}
+
+Al termine di questa fase, l'algoritmo riparte dalla Fase 1 applicata alla
+nuova rete aggregata. Il ciclo termina quando la modularità non può più essere
+migliorata.
+
+\subsubsection{Algoritmo Surprise}
+
+A causa dei limiti della modularità, è stata introdotta una misura alternativa
+basata sulla teoria delle probabilità, nota come \textbf{Surprise}, per
+valutare la qualità di una partizione di una rete in comunità.
+
+L'algoritmo Surprise è strutturalmente simile all'algoritmo di Louvain, con la
+differenza fondamentale che utilizza la metrica Surprise invece della
+modularità come funzione obiettivo. I nodi vengono spostati da una comunità
+all'altra in modo greedy, cercando di massimizzare il valore di Surprise.
+
+L'approccio si basa sulla probabilità che un arco si trovi all'interno di una
+comunità piuttosto che tra comunità diverse. In particolare:
+\begin{itemize}
+    \item L'uso della Surprise è efficace per identificare comunità di
+    \textbf{piccole dimensioni}.
+    \item L'uso della modularità è più adatto per individuare comunità di
+    \textbf{grandi dimensioni}.
+\end{itemize}
+
+Il modello di Surprise per la valutazione delle comunità è definito come:
+\[
+Q = m \cdot D(q \| \langle q \rangle)
+\]
+dove:
+\begin{itemize}
+    \item $m$ è il numero totale di archi nella rete.
+    \item $q = \frac{\sum_c m_c}{m}$ è la frazione di archi interni alle
+    comunità, con $m_c$ che rappresenta il numero di archi interni alla
+    comunità $c$.
+    \item $\langle q \rangle = \frac{\sum_c \binom{n_c}{2}}{\binom{n}{2}}$ è la
+    frazione attesa di archi interni, dove $n_c$ è il numero di nodi nella
+    comunità $c$ e $n$ è il numero totale di nodi.
+    \item $D(x \| y) = x \ln\frac{x}{y} + (1-x) \ln\frac{1-x}{1-y}$ è la
+    \textbf{divergenza di Kullback-Leibler} (o divergenza entropica) tra le
+    distribuzioni osservata e attesa.
+\end{itemize}
+
+
+\subsubsection{Algoritmo di Leiden}
+
+L'\textbf{Algoritmo di Leiden} è un'evoluzione dell'algoritmo di Louvain
+proposta per risolverne alcune limitazioni strutturali.
+È stato dimostrato che Louvain tende a scoprire comunità che possono essere
+\textbf{disconnesse internamente} (ovvero composte da parti non collegate tra
+loro) o solo debolmente connesse.
+Questo accade perché, in Louvain, lo spostamento di un nodo "ponte" verso una
+nuova comunità può spezzare la connettività della vecchia comunità, ma l'algoritmo non
+prevede meccanismi per correggere questa situazione se non tramite ulteriori
+suddivisioni successive (che potrebbero non avvenire).
+
+L'algoritmo di Leiden è generalmente più veloce e garantisce che le comunità
+restituite siano \textbf{ben connesse}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/36.png}
+    \caption{
+        Confronto schematico delle fasi tra Louvain e Leiden.
+    }
+\end{figure}
+
+L'algoritmo integra una fase aggiuntiva di raffinamento. Le tre fasi sono:
+\begin{enumerate}
+    \item \textbf{Spostamento locale dei nodi (Fast local move)}: Simile a
+    Louvain, ma ottimizzato. Invece di visitare tutti i nodi ad ogni passata,
+     Leiden visita solo i nodi il cui vicinato è cambiato, riducendo i tempi di
+     calcolo.
+    \item \textbf{Raffinamento delle partizioni (Refinement)}: Questa fase
+    intermedia serve a identificare e separare eventuali sottostrutture
+    all'interno delle comunità proposte. A differenza dell'approccio greedy
+    puro, il raffinamento può fondere un nodo con una comunità scelta in modo
+    parzialmente casuale (purché aumenti la funzione di qualità), permettendo
+    di esplorare lo spazio delle partizioni in modo più ampio.
+    \item \textbf{Aggregazione della rete}: La rete viene aggregata basandosi
+    sulle partizioni \emph{raffinate}, non su quelle grezze della prima fase.
+\end{enumerate}
+
+\subsection{Comunità sovrapposte}
+
+Molti degli algoritmi di community detection discussi finora operano
+sotto l'assunzione che le comunità siano partizioni disgiunte della rete,
+ovvero che ogni nodo possa appartenere a una e una sola comunità.
+Tuttavia, nelle reti reali, specialmente in quelle sociali, i nodi possono
+naturalmente appartenere a più gruppi contemporaneamente.
+
+Un individuo, ad esempio, può far parte della sua famiglia, del suo gruppo di
+lavoro e di un circolo di amici, agendo come ponte tra questi diversi mondi sociali.
+Gli algoritmi di \textbf{comunità sovrapposte} sono progettati per catturare
+questa complessa realtà, permettendo ai nodi di avere molteplici appartenenze.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/37.png}
+    \caption{
+        Esempio di comunità sovrapposte in una rete sociale.
+    }
+\end{figure}
+
+
+\subsubsection{Percolazione di cricche (CFinder)}
+
+Un approccio per identificare comunità sovrapposte si basa sull'idea che una
+comunità è un'unione di piccoli sottografi completi (cricche). Questo è il
+principio del \textbf{Clique Percolation Method (CPM)}, implementato
+nell'algoritmo \textbf{CFinder}.
+
+La definizione di comunità si basa su due concetti:
+\begin{itemize}
+    \item Una \textbf{k-cricca} (\Cref{def:k_clique}) è un sottografo di $k$ nodi
+    dove ogni nodo è connesso a tutti gli altri.
+    \item Due k-cricche sono dette \textbf{adiacenti} se condividono esattamente
+    $k-1$ nodi.
+\end{itemize}
+
+Una \textbf{comunità} è definita come l'unione di tutte le k-cricche che possono
+essere raggiunte l'una dall'altra attraverso una serie di adiacenze.
+I nodi che appartengono a più di una di queste comunità sono considerati
+nodi sovrapposti.
+
+
+\begin{figure}[H]
+
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/38.png}
+    \caption{
+        Esempio di rilevamento di comunità sovrapposte (cerchi rossi e blu)
+        tramite percolazione di k-cricche (con $k=3$). I nodi e le cricche
+        condivise formano la sovrapposizione.
+    }
+\end{figure}
+
+
+Per distinguere le comunità reali da quelle che potrebbero emergere
+casualmente in una rete densa, si analizza la soglia di percolazione delle
+k-cricche in un grafo casuale. Una grande comunità di k-cricche emerge solo
+se la probabilità di connessione $p$ supera una soglia critica $p_c(k)$.
+Per un grafo di Erdős-Rényi con $N$ nodi, questa soglia è:
+\[
+p_c(k) \approx \frac{1}{[(k-1)N]^{\frac{1}{k-1}}}
+\]
+Se la densità di k-cricche osservata nella rete reale è significativamente
+superiore a quella attesa in un grafo casuale, le comunità identificate sono
+considerate strutturalmente significative.
+
+
+\subsubsection{Link clustering}
+
+L'approccio del \textbf{link clustering} (o clustering dei collegamenti) parte
+da un'intuizione diversa: mentre i nodi hanno spesso molteplici contesti
+sociali (e quindi appartengono a più comunità), gli archi tendono a
+rappresentare una singola relazione specifica. Ad esempio, un collegamento
+in una rete sociale può rappresentare un legame familiare, di lavoro o di
+amicizia, ma raramente tutti insieme.
+L'obiettivo è quindi raggruppare gli archi invece dei nodi.
+
+\paragraph{Passo 1: Definire la similarità tra link}
+
+La somiglianza tra due archi viene calcolata in base alla sovrapposizione dei
+rispettivi vicinati. Per due archi $e_{ik}=(i,k)$ e $e_{jk}=(j,k)$ incidenti
+sullo stesso nodo $k$, la loro similarità è definita come l'indice di Jaccard
+dei vicinati di $i$ e $j$ (inclusi i nodi stessi):
+\[
+S(e_{ik}, e_{jk}) = \frac{|\mathcal{N}(i) \cap \mathcal{N}(j)|}{|\mathcal{N}(i) \cup \mathcal{N}(j)|}
+\]
+dove $\mathcal{N}(x) = \{x\} \cup \{v \mid (x,v) \in E\}$ è l'insieme del nodo
+$x$ e dei suoi vicini. Un'alta similarità indica che i due archi appartengono
+allo stesso contesto relazionale.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/39.png}
+    \caption{
+        Esempio di calcolo della similarità tra due collegamenti.
+    }
+\end{figure}
+
+\paragraph{Passo 2: Clustering gerarchico degli archi}
+
+Una volta calcolata la matrice di similarità per tutte le coppie di archi
+incidenti, si applica un algoritmo di clustering gerarchico agglomerativo
+(solitamente single-linkage). Questo produce un dendrogramma che mostra come
+gli archi si raggruppano a diversi livelli di similarità. Tagliando il
+dendrogramma a una certa soglia, si ottengono le comunità di archi. I nodi
+che partecipano a più comunità di archi sono i nodi sovrapposti.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/40.png}
+    \caption{
+        Esempio di dendrogramma risultante dal clustering dei link. Tagliando
+        il dendrogramma a diverse soglie di similarità si ottengono partizioni
+        diverse degli archi.
+    }
+\end{figure}
+
+
+
+\begin{esempio}{Rete dei personaggi di Les Misérables}{}
+
+    Nella rete dei personaggi del romanzo Les Misérables, due
+    personaggi sono collegati se interagiscono. Applicando il link clustering,
+    i colori degli archi indicano le comunità di link. Ogni nodo è
+    rappresentato da un grafico a torta che mostra la sua frazione di
+    appartenenza alle diverse comunità. Non sorprende che il protagonista,
+    Jean Valjean, sia il personaggio con le appartenenze più diversificate,
+    collegando diverse sottotrame e gruppi di personaggi.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{images/th_05/41.png}
+        \caption{
+            Rete dei personaggi di Les Misérables con comunità sovrapposte
+            identificate tramite link clustering.
+        }
+    \end{figure}
+
+\end{esempio}
+
+\subsubsection{Valutazione dei risultati}
+Per confrontare due partizioni (ad esempio, quella trovata da un algoritmo e
+una di riferimento, o \textit{ground truth}), si possono usare misure basate
+sulla teoria dell'informazione, come l'\textbf{informazione mutua
+normalizzata}. L'idea è che se due partizioni $\mathcal{C}_1$ e
+$\mathcal{C}_2$ sono simili, è necessaria poca informazione per descrivere
+una data l'altra.
+
+L'\textbf{informazione mutua} $I(\mathcal{C}_1, \mathcal{C}_2)$ è definita come:
+\[
+I(\mathcal{C}_1, \mathcal{C}_2) = \sum_{C_1 \in \mathcal{C}_1} \sum_{C_2 \in \mathcal{C}_2} p(C_1, C_2) \log \frac{p(C_1, C_2)}{p(C_1)p(C_2)}
+\]
+dove $p(C_1, C_2)$ è la probabilità che un nodo scelto a caso appartenga
+contemporaneamente alla comunità $C_1$ della prima partizione e $C_2$ della
+seconda, mentre $p(C_1)$ e $p(C_2)$ sono le probabilità marginali.
+
+Poiché l'informazione mutua non è normalizzata, si utilizza la NMI:
+\[
+\text{NMI}(\mathcal{C}_1, \mathcal{C}_2) = \frac{2 \cdot I(\mathcal{C}_1, \mathcal{C}_2)}{H(\mathcal{C}_1) + H(\mathcal{C}_2)}
+\]
+dove $H(\mathcal{C}) = -\sum_{C \in \mathcal{C}} p(C) \log p(C)$ è l'entropia
+della partizione $\mathcal{C}$.
+
+La NMI assume valori tra 0 (partizioni indipendenti) e 1 (partizioni identiche).
+\subsubsection{Lancichinetti-Fortunato-Radicchi (LFR) Benchmark}
+
+Per testare e confrontare algoritmi di community detection, in particolare
+quelli per comunità sovrapposte, si usano reti sintetiche con proprietà
+controllate. Il \textbf{benchmark LFR} è un modello generativo che produce
+grafi con una struttura comunitaria realistica. Le sue caratteristiche sono:
+\begin{itemize}
+
+    \item Le distribuzioni dei gradi dei nodi e delle dimensioni delle comunità
+    seguono una \textbf{legge di potenza}, come spesso accade nelle reti reali.
+    \item Ogni nodo condivide una frazione $(1-\mu)$ dei suoi archi con nodi
+    della stessa comunità (grado interno) e una frazione $\mu$ con nodi di
+    altre comunità (grado esterno). Il \textbf{parametro di mixing} $\mu$
+    controlla la difficoltà del rilevamento: per $\mu$ bassi le comunità sono
+    ben definite, per $\mu$ alti sono più confuse.
+    \item Il modello permette di specificare il numero di comunità a cui ogni
+    nodo può appartenere, rendendolo ideale per testare algoritmi per comunità
+    sovrapposte.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/42.png}
+    \caption{
+        Esempio di valutazione delle performance di algoritmi su benchmark.
+        (a) NG benchmark; (b) LFR benchmark, che mostra come la performance
+        (misurata con NMI) degrada all'aumentare del mixing $\mu$.
+    }
+\end{figure}
+
+
+\subsubsection{Label Propagation Algorithm (LPA)}
+
+L'\textbf{Algoritmo di Propagazione delle Etichette (LPA)} è un metodo molto
+veloce per trovare comunità in grafi di grandi dimensioni. Il suo punto di
+forza è la semplicità: non richiede l'ottimizzazione di una funzione
+obiettivo (come la modularità) né la conoscenza a priori del numero di comunità.
+
+L'algoritmo funziona come segue:
+\begin{enumerate}
+    \item \textbf{Inizializzazione}: A ogni nodo viene assegnata un'etichetta
+    univoca (ogni nodo è una comunità a sé).
+    \item \textbf{Propagazione}: In modo iterativo e in ordine casuale, ogni
+    nodo aggiorna la sua etichetta adottando quella più frequente tra i suoi
+    vicini. In caso di parità, la scelta è casuale.
+    \item \textbf{Convergenza}: L'algoritmo termina quando, in un'intera
+    passata, nessun nodo cambia la sua etichetta.
+\end{enumerate}
+
+I nodi che condividono la stessa etichetta alla fine del processo appartengono
+alla stessa comunità.
+
+\begin{nota}{LPA e comunità sovrapposte}{}
+    Nella sua versione base, LPA produce partizioni non sovrapposte. Tuttavia,
+    il meccanismo di aggiornamento può essere modificato per gestire le
+    sovrapposizioni. Ad esempio, un nodo potrebbe mantenere più etichette se
+    queste sono ugualmente frequenti tra i suoi vicini, o varianti come
+    \textbf{COPRA} (Community Overlap PRopagation Algorithm) sono state
+    sviluppate specificamente per questo scopo.
+\end{nota}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/th_05/43.png}
+    \caption{
+        Esempio di funzionamento dell'algoritmo LPA. I nodi adottano
+        iterativamente l'etichetta di maggioranza nel loro vicinato fino
+        a raggiungere uno stato stabile.
+    }
+
 \end{figure}
